@@ -11,10 +11,10 @@
     </parent>
 
 
-    <artifactId>basic-server</artifactId>
+    <artifactId>form-login</artifactId>
     <version>1.0</version>
-    <name>basic-server</name>
-    <description>Spring Security basic-server</description>
+    <name>form-login</name>
+    <description>Spring Security form-login</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
