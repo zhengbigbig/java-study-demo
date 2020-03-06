@@ -173,7 +173,7 @@ public interface UserDetails extends Serializable {
 2. ```UsernamePasswordAuthenticationFilter```构建```UsernamePasswordAuthenticationToken```调用```AuthenticationManager```校验
 3. ```AuthenticationManager```中根据对应```AuthenticationProvider```中```supports```支持的```Token```类型调用对应的```provider```
 4. ```AuthenticationProvider```加载用户数据，然后校验并返回```Token```给```UsernamePasswordAuthenticationFilter```
-5. ```UsernamePasswordAuthenticationFilter```将调用父类```AbstractAuthenticationProcessingFilter```
+5. ```UsernamePasswordAuthenticationFilter```将调用父类```AbstractAuthenticationProcessingFilter```的```AuthenticationManager```，其父类的```doFilter```将会根据返回结果进行处理
 	- 将```Token```信息保存到```session```
 	- 然后通过```successfulAuthentication```的```SecurityContextHolder.getContext().setAuthentication(authResult)``` 将```Authentication``` 保存到上下文
 6. ```SecurityContext```存入到```session```

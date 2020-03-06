@@ -1,5 +1,7 @@
 package com.zbb.basicserver.config;
 
+import com.zbb.basicserver.auth.CustomAuthenticationSuccessHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -9,8 +11,12 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.annotation.Resource;
+
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+    @Resource // Resource和Autowired的区别是前者按照名称（byName）来装配，后者按照类型（byType）装配
+    CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
     // http security 配置
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -21,7 +27,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .usernameParameter("uname")
                 .passwordParameter("pword")
                 .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/index")
+//                .defaultSuccessUrl("/index")
+                .successHandler(customAuthenticationSuccessHandler)
                 .and()
                 .authorizeRequests()
                 // 需要放行的资源
