@@ -1,7 +1,7 @@
 package com.zbb.basicserver.config;
 
+import com.zbb.basicserver.auth.CustomAuthenticationFailureHandler;
 import com.zbb.basicserver.auth.CustomAuthenticationSuccessHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -16,7 +16,10 @@ import javax.annotation.Resource;
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Resource // Resource和Autowired的区别是前者按照名称（byName）来装配，后者按照类型（byType）装配
-    CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+            CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    @Resource
+    CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+
     // http security 配置
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -29,14 +32,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .loginProcessingUrl("/login")
 //                .defaultSuccessUrl("/index")
                 .successHandler(customAuthenticationSuccessHandler)
+//                .failureUrl("/login.html")
+                .failureHandler(customAuthenticationFailureHandler)
                 .and()
                 .authorizeRequests()
                 // 需要放行的资源
-                .antMatchers("/login.html","/login").permitAll()
+                .antMatchers("/login.html", "/login").permitAll()
                 // 需要对外暴露的资源路径
-                .antMatchers("/biz1","/biz2")
+                .antMatchers("/biz1", "/biz2")
                 // /biz1、/biz2只需要有admin或者user都可访问
-                .hasAnyAuthority("ROLE_user","ROLE_admin")
+                .hasAnyAuthority("ROLE_user", "ROLE_admin")
                 .antMatchers("/syslog").hasAnyAuthority("sys:log")
                 .antMatchers("/sysuser").hasAnyAuthority("sys:user")
                 // admin角色可以访问
@@ -49,7 +54,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) {
         //将项目中静态资源路径开放出来
         web.ignoring()
-                .antMatchers( "/css/**", "/fonts/**", "/img/**", "/js/**");
+                .antMatchers("/css/**", "/fonts/**", "/img/**", "/js/**");
     }
 
     // 鉴权管理
@@ -59,7 +64,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .withUser("admin")
                 .password(passwordEncoder().encode("123456"))
 //                .roles("admin")
-                .authorities("sys:log","sys:user")
+                .authorities("sys:log", "sys:user")
                 .and()
                 .withUser("user")
                 .password(passwordEncoder().encode("123456"))
@@ -68,7 +73,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     // 设置加密
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }
