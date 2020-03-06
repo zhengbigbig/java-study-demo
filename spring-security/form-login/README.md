@@ -182,4 +182,8 @@ public interface UserDetails extends Serializable {
 9. ```FilterSecurityInterceptor```会看当前的```Authentication```中```isAuthentated```是否为```true```
 10. 通过之后将根据资源权限进行访问
 
-总结：熟悉整个过滤器流程后，就可以开始自定义的对自己的实际业务进行处理了。
+总结：
+
+1. 熟悉整个过滤器流程后，就可以开始自定义的对自己的实际业务进行处理了。
+2. 当前这种通过配置模式实现的登录验证，一般是不适合前后端分离的应用的
+3. 前后端分离的应用，期待响应结果是JSON，或，不同用户登录，能访问到不同的界面，这些是需要自定义处理的
