@@ -8,3 +8,5 @@
 
 1. httpBasic 模式登录认证
 2. formLogin 模式登录认证
+3. customLogin 自定义登录处理
+4. sessionManager session管理

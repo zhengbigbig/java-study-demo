@@ -6,10 +6,10 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
 // springboot 会自动加载数据库配置，若没有使用，需要排除
 @SpringBootApplication(exclude= {DataSourceAutoConfiguration.class})
-public class BasicServerApplication {
+public class HttpLoginApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(BasicServerApplication.class, args);
+        SpringApplication.run(HttpLoginApplication.class, args);
     }
 
 }
