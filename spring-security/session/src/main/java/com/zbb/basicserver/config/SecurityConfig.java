@@ -2,12 +2,14 @@ package com.zbb.basicserver.config;
 
 import com.zbb.basicserver.auth.CustomAuthenticationFailureHandler;
 import com.zbb.basicserver.auth.CustomAuthenticationSuccessHandler;
+import com.zbb.basicserver.auth.CustomExpiredSessionStrategy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -19,6 +21,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
     @Resource
     CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+
+    @Resource
+    CustomExpiredSessionStrategy customExpiredSessionStrategy;
 
     // http security 配置
     @Override
@@ -46,6 +51,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/sysuser").hasAnyAuthority("sys:user")
                 // admin角色可以访问
                 .anyRequest().authenticated();
+        http
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .invalidSessionUrl("/login.html") // 非法session
+                .maximumSessions(1)
+                .maxSessionsPreventsLogin(false)
+                .expiredSessionStrategy(customExpiredSessionStrategy);
     }
 
     // 配置webSecurity ignore 掉的 是不会走资源拦截器或者过滤器的 也就是FilterSecurityInterceptor等
