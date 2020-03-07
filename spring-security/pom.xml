@@ -22,6 +22,7 @@
         <module>form-login</module>
         <module>custom-login</module>
         <module>session</module>
+        <module>rbac-manager</module>
     </modules>
 
     <properties>
@@ -68,12 +69,12 @@
 引入的开源JavaScript库/CSS库将会以jar的形式被打包进工程
 -->
         <!-- https://mvnrepository.com/artifact/org.webjars/jquery -->
-        <dependency>
+<!--        <dependency>-->
 
-            <groupId>org.webjars</groupId>
-            <artifactId>jquery</artifactId>
-            <version>3.4.1</version>
-        </dependency>
+<!--            <groupId>org.webjars</groupId>-->
+<!--            <artifactId>jquery</artifactId>-->
+<!--            <version>3.4.1</version>-->
+<!--        </dependency>-->
         <!-- 省略版本号 避免以 /jquery/1.12.4等形式显示 可以直接使用/jquery-->
         <!--        <dependency>-->
         <!--            <groupId>org.webjars</groupId>-->
