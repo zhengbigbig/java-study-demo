@@ -86,17 +86,18 @@ public class CustomUserDetailsService implements UserDetailsService
 - Spring Security 可用表达式对象基类是```SecurityExpressionRoot```
 
 #### 2.1 常用的权限表达式
-```hasRole([role])```	用户拥有指定的角色时返回true （Spring security默认会带有ROLE_前缀）,也可以通过配置移除
-```hasAnyRole([role1,role2])```	用户拥有任意一个指定的角色时返回true
-```hasAuthority([authority])```	拥有某资源的访问权限时返回true
-```hasAnyAuthority([auth1,auth2])```	拥有某些资源其中部分资源的访问权限时返回true
-```permitAll```	永远返回true
-```denyAll```	永远返回false
-```anonymous```	当前用户是anonymous时返回true
-```rememberMe```	当前用户是rememberMe用户返回true
-```authentication```	当前登录用户的authentication对象
-```fullAuthenticated```	当前用户既不是anonymous也不是rememberMe用户时返回true
-```hasIpAddress('192.168.1.0/24')```	请求发送的IP匹配时返回true
+
+- ```hasRole([role])```	用户拥有指定的角色时返回true （Spring security默认会带有ROLE_前缀）,也可以通过配置移除
+- ```hasAnyRole([role1,role2])```	用户拥有任意一个指定的角色时返回true
+- ```hasAuthority([authority])```	拥有某资源的访问权限时返回true
+- ```hasAnyAuthority([auth1,auth2])```	拥有某些资源其中部分资源的访问权限时返回true
+- ```permitAll```	永远返回true
+- ```denyAll```	永远返回false
+- ```anonymous```	当前用户是anonymous时返回true
+- ```rememberMe```	当前用户是rememberMe用户返回true
+- ```authentication```	当前登录用户的authentication对象
+- ```fullAuthenticated```	当前用户既不是anonymous也不是rememberMe用户时返回true
+- ```hasIpAddress('192.168.1.0/24')```	请求发送的IP匹配时返回true
 
 #### 2.2 SpEL在全局配置中的使用
 
