@@ -80,9 +80,29 @@ public class CustomUserDetailsService implements UserDetailsService
 
 重写之后测试是能通过的
 
-### 2. 利用权限表达式简化```httpSecurity```
+### 2 权限表达式
+- SpEL  Spring Expression Language ：Spring表达式语言
+- Spring Security 3.0 可使用SpEL来控制授权，表达式返回布尔老赖控制访问
+- Spring Security 可用表达式对象基类是```SecurityExpressionRoot```
 
-#### 2.1 权限表达式
+#### 2.1 常用的权限表达式
+```hasRole([role])```	用户拥有指定的角色时返回true （Spring security默认会带有ROLE_前缀）,也可以通过配置移除
+```hasAnyRole([role1,role2])```	用户拥有任意一个指定的角色时返回true
+```hasAuthority([authority])```	拥有某资源的访问权限时返回true
+```hasAnyAuthority([auth1,auth2])```	拥有某些资源其中部分资源的访问权限时返回true
+```permitAll```	永远返回true
+```denyAll```	永远返回false
+```anonymous```	当前用户是anonymous时返回true
+```rememberMe```	当前用户是rememberMe用户返回true
+```authentication```	当前登录用户的authentication对象
+```fullAuthenticated```	当前用户既不是anonymous也不是rememberMe用户时返回true
+```hasIpAddress('192.168.1.0/24')```	请求发送的IP匹配时返回true
+
+#### 2.2 SpEL在全局配置中的使用
+
+##### 2.2.1 URL安全表达式
+
+-  ```httpSecurity``` 配置
 ```java
         http
                 .authorizeRequests()
@@ -91,33 +111,78 @@ public class CustomUserDetailsService implements UserDetailsService
                 // 权限表达式的使用和自定义
                 .antMatchers("/biz1").access("hasRole('ADMIN')")
                 .antMatchers("/biz2").hasRole("USER")
+                .antMatchers("/person/{id}").access("@rbacService.checkUserId(authentication,#id)")
                 .anyRequest().access("@rbacService.hasPermission(request,authentication)");
 ```
 
-#### 2.2 ```rbacService```实现
+- ```rbacService```实现表达式的Bean
 ```java
 @Service("rbacService")
 public class RBACService {
-    private AntPathMatcher antPathMatcher = new AntPathMatcher();
 
-    @Resource
-    private UserMapper userMapper;
-
-    /**
-     * 判断某用户是否具有该request资源的访问权限
-     */
     public boolean hasPermission(HttpServletRequest request, Authentication authentication) {
-        Object principal = authentication.getPrincipal();
-
-        if (principal instanceof UserDetails) {
-            String username = ((UserDetails) principal).getUsername();
-            // 从数据库动态加载，避免权限不是最新
-            List<String> urls = userMapper.getPermissionsByUsername(username);
-            return urls.stream().anyMatch(
-                    url -> antPathMatcher.match(url, request.getRequestURI())
-            );
-        }
-        return false;
+        // TODO 逻辑处理
+        return true;
     }
+    public boolean checkUserId(Authentication authentication, int id) {
+        // TODO 逻辑处理
+        return true;
+    }
+
+}
+```
+
+
+##### 2.2.2 Method表达式安全控制
+
+1. 开启方法级别注解配置
+```java
+@Configuration
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+public class SecurityConfig extends WebSecurityConfigurerAdapter
+```
+
+2. ```PreAuthorize```注解
+- 进入方法前进行权限校验，校验未通过，抛出```AccessDeniedException```
+```java
+@PreAuthorize("hasRole('admin')")
+public List<PersonDemo> findAll(){
+    return null;
+}
+```
+
+3. ```PostAuthorize```注解
+- 在方法执行后再进行权限验证,适合根据返回值结果进行权限验证
+- 返回值判断通过，返回对象，不通过，抛出异常
+```java
+@PostAuthorize("returnObject.name == authentication.name")
+public PersonDemo findOne(){
+    String authName =
+            SecurityContextHolder.getContext().getAuthentication().getName();
+    System.out.println(authName);
+    return new PersonDemo("admin");
+}
+```
+
+4. ```PreFilter```注解
+- 对传入的参数进行过滤
+```java
+@PreFilter(filterTarget="ids", value="filterObject%2==0")
+public void delete(List<Integer> ids, List<String> usernames) {
+
+}
+```
+
+5. ```PostFilter```注解
+- 对返回的结果进行过滤，适用于集合类返回值
+```java
+@PostFilter("filterObject.name == authentication.name")
+public List<PersonDemo> findAllPD(){
+
+    List<PersonDemo> list = new ArrayList<>();
+    list.add(new PersonDemo("kobe"));
+    list.add(new PersonDemo("admin"));
+
+    return list;
 }
 ```

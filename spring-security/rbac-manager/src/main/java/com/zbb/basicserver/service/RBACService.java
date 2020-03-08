@@ -30,7 +30,7 @@ public class RBACService {
 
         if (principal instanceof UserDetails) {
             String username = ((UserDetails) principal).getUsername();
-            // 从数据库动态加载，避免权限不是最新
+            // 从数据库动态加载，为了提高性能，实际可更改为redis spring cache
             List<String> urls = userMapper.getPermissionsByUsername(username);
             return urls.stream().anyMatch(
                     url -> antPathMatcher.match(url, request.getRequestURI())
