@@ -51,8 +51,14 @@ insert into SYS_PERMISSION_ROLE (ROLE_ID, PERMISSION_ID)
 values (1, 1);
 insert into SYS_PERMISSION_ROLE (ROLE_ID, PERMISSION_ID)
 values (1, 2);
+insert into SYS_PERMISSION_ROLE (ROLE_ID, PERMISSION_ID)
+values (1, 3);
+insert into SYS_PERMISSION_ROLE (ROLE_ID, PERMISSION_ID)
+values (2, 3);
 
 insert into sys_permission (name, description, url, pid)
 values ('sys:log', '管理', '/syslog', null);
 insert into sys_permission (name, description, url, pid)
 values ('sys:user', '管理', '/sysuser', null);
+insert into sys_permission (name, description, url, pid)
+values ('index', '主页', '/index', null);

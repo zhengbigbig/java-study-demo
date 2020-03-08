@@ -32,8 +32,6 @@
 
 ### 1. 数据库动态加载用户权限
 
-#### 1.1 流程
-
 介绍：
 - 前面的demo已经分析了认证的整个源码过程，因此我们需要自定义的东西并不多
 - 基于数据库加载用户信息，spring security给我们提供了```DaoAuthenticationProvider```,
@@ -41,12 +39,12 @@
 - 从```UserDetailsService```加载出来的是```UserDetails```，
 为了方便，我们使用自定义的User来继承该接口并实现，便于后续强转(强制类型转换)
 
-##### 1.1.1 UserDetails实现
+#### 1.1 UserDetails实现
 ```java
 public class User implements UserDetails
 ```
 具体看代码
-##### 1.1.2 UserDetailsService实现
+#### 1.2 UserDetailsService实现
 ```java
 public class CustomUserDetailsService implements UserDetailsService
 ```
@@ -55,3 +53,71 @@ public class CustomUserDetailsService implements UserDetailsService
 - 从数据库加载角色信息
 - 根据角色信息加载资源权限信息
 - 最后返回```UserDetails```
+
+#### 1.3 配置security
+```java
+    // 鉴权管理
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(daoAuthenticationProvider());
+    }
+
+    @Bean
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
+        daoAuthenticationProvider.setUserDetailsService(customUserDetailsService);
+        return daoAuthenticationProvider;
+    }
+```
+当然，也可以简化配置，我这里配置，便于后面添加别的provider
+
+重写之后测试是能通过的
+
+### 2. 利用权限表达式简化```httpSecurity```
+
+#### 2.1 权限表达式
+```java
+        http
+                .authorizeRequests()
+                // 需要放行的资源
+                .antMatchers("/login.html", "/login", "/auth/**").permitAll()
+                // 权限表达式的使用和自定义
+                .antMatchers("/biz1").access("hasRole('ADMIN')")
+                .antMatchers("/biz2").hasRole("USER")
+                .anyRequest().access("@rbacService.hasPermission(request,authentication)");
+```
+
+#### 2.2 ```rbacService```实现
+```java
+@Service("rbacService")
+public class RBACService {
+    private AntPathMatcher antPathMatcher = new AntPathMatcher();
+
+    @Resource
+    private UserMapper userMapper;
+
+    /**
+     * 判断某用户是否具有该request资源的访问权限
+     */
+    public boolean hasPermission(HttpServletRequest request, Authentication authentication) {
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof UserDetails) {
+            String username = ((UserDetails) principal).getUsername();
+            // 从数据库动态加载，避免权限不是最新
+            List<String> urls = userMapper.getPermissionsByUsername(username);
+            return urls.stream().anyMatch(
+                    url -> antPathMatcher.match(url, request.getRequestURI())
+            );
+        }
+        return false;
+    }
+}
+```

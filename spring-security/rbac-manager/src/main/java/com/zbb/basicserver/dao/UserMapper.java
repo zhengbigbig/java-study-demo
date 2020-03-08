@@ -42,6 +42,16 @@ public interface UserMapper {
             "</script>\n"})
     List<Permission> getPermissionsByRoles(@Param("roles") List<Integer> roles);
 
+    @Select("select SP.url as url\n" +
+            "from USER U\n" +
+            "         left join SYS_ROLE_USER SRU on U.ID = SRU.USER_ID\n" +
+            "         left join SYS_ROLE SR on SR.ID = SRU.ROLE_ID\n" +
+            "         left join SYS_PERMISSION_ROLE SPR on SRU.ROLE_ID = SPR.ROLE_ID\n" +
+            "         left join SYS_PERMISSION SP on SP.ID = SPR.PERMISSION_ID\n" +
+            "WHERE USERNAME = #{username}\n" +
+            "group by sp.ID")
+    List<String> getPermissionsByUsername(@Param("username") String username);
+
     @Select("select * from SYS_PERMISSION")
     List<Permission> getAllPermissions();
 }

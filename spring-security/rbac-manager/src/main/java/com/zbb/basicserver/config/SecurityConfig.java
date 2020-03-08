@@ -45,19 +45,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .successHandler(customAuthenticationSuccessHandler)
 //                .failureUrl("/login.html")
                 .failureHandler(customAuthenticationFailureHandler)
+
                 .and()
                 .authorizeRequests()
                 // 需要放行的资源
-                .antMatchers("/login.html", "/login").permitAll()
-                // 需要对外暴露的资源路径
-                .antMatchers("/biz1", "/biz2")
-                // /biz1、/biz2只需要有admin或者user都可访问
-                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
-                .antMatchers("/syslog").hasAnyAuthority("sys:log")
-                .antMatchers("/sysuser").hasAnyAuthority("sys:user")
-                .antMatchers("/auth/**").permitAll()
-                // admin角色可以访问
-                .anyRequest().authenticated();
+                .antMatchers("/login.html", "/login", "/auth/**").permitAll()
+                // 权限表达式的使用和自定义
+                .antMatchers("/biz1").access("hasRole('ADMIN')")
+                .antMatchers("/biz2").hasRole("USER")
+                .anyRequest().access("@rbacService.hasPermission(request,authentication)");
         http
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
@@ -89,7 +85,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider(){
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
         daoAuthenticationProvider.setUserDetailsService(customUserDetailsService);
