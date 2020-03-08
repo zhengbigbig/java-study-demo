@@ -68,6 +68,7 @@ spring:
 #### 3.3 基于内存的方式的坑
 - 在使用基于内存的用户时，在第一次登录后```SecurityContextHolder.getContext()```会保留你的登录信息，即使你重启了应用，也还是在
 - 除非你主动```SecurityContextHolder.clearContext()```，清除上下文，当然还有别的方式，暂时先不提
+- 当然你也可以直接使用应用启动自动生成的密码
 
 ### 4. 基于JDBC 鉴权
 ```java
