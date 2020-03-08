@@ -3,8 +3,11 @@ package com.zbb.basicserver.config;
 import com.zbb.basicserver.auth.CustomAuthenticationFailureHandler;
 import com.zbb.basicserver.auth.CustomAuthenticationSuccessHandler;
 import com.zbb.basicserver.auth.CustomExpiredSessionStrategy;
+import com.zbb.basicserver.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -24,6 +27,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Resource
     CustomExpiredSessionStrategy customExpiredSessionStrategy;
+
+    @Resource
+    CustomUserDetailsService customUserDetailsService;
 
     // http security 配置
     @Override
@@ -46,9 +52,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // 需要对外暴露的资源路径
                 .antMatchers("/biz1", "/biz2")
                 // /biz1、/biz2只需要有admin或者user都可访问
-                .hasAnyAuthority("ROLE_user", "ROLE_admin")
+                .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                 .antMatchers("/syslog").hasAnyAuthority("sys:log")
                 .antMatchers("/sysuser").hasAnyAuthority("sys:user")
+                .antMatchers("/auth/**").permitAll()
                 // admin角色可以访问
                 .anyRequest().authenticated();
         http
@@ -72,15 +79,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     // 鉴权管理
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication()
-                .withUser("admin")
-                .password(passwordEncoder().encode("123456"))
-//                .roles("admin")
-                .authorities("sys:log", "sys:user")
-                .and()
-                .withUser("user")
-                .password(passwordEncoder().encode("123456"))
-                .roles("user");
+        auth.authenticationProvider(daoAuthenticationProvider());
+    }
+
+    @Bean
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider(){
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
+        daoAuthenticationProvider.setUserDetailsService(customUserDetailsService);
+        return daoAuthenticationProvider;
     }
 
     // 设置加密

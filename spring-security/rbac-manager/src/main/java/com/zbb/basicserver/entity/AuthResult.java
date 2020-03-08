@@ -7,7 +7,6 @@ import lombok.Getter;
  * Description:
  */
 
-@Getter
 public class AuthResult<T> {
     public enum STATE {
         OK("ok"),
@@ -20,12 +19,12 @@ public class AuthResult<T> {
         }
     }
 
-    STATE state;
+    STATE status;
     String msg;
     T data;
 
-    public AuthResult(STATE state, String msg, T data) {
-        this.state = state;
+    public AuthResult(STATE status, String msg, T data) {
+        this.status = status;
         this.msg = msg;
         this.data = data;
     }
@@ -36,5 +35,17 @@ public class AuthResult<T> {
 
     public static AuthResult failure(String msg) {
         return new AuthResult(STATE.FAIL, msg, null);
+    }
+
+    public String getStatus() {
+        return status.status;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public T getData() {
+        return data;
     }
 }

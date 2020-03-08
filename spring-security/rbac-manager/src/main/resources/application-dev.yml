@@ -26,6 +26,5 @@ spring:
     password: my-secret-pw
     driver-class-name: org.h2.Driver
 mybatis:
-  config-location: classpath:db/mybatis/config.xml
   configuration:
     mapUnderscoreToCamelCase: true

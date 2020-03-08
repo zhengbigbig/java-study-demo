@@ -14,12 +14,13 @@ import java.util.List;
 public interface UserMapper {
 
     @Insert("insert into USER (USERNAME, ENCRYPTED_PASSWORD, CREATED_AT, UPDATED_AT)\n" +
-            "values (#{username},#{encryptedPassword},#{createdAt},#{updatedAt});")
-    int createUser(@Param("user") User user);
+            "values (#{username},#{encryptedPassword},now(),now())")
+    void createUser(@Param("username") String username, @Param("encryptedPassword") String encryptedPassword);
 
     @Select("select *\n" +
             "from USER where USERNAME = #{username}")
     User findUserByUsername(@Param("username") String username);
+
 
     @Select("select SR.*\n" +
             "from USER U\n" +
@@ -28,15 +29,18 @@ public interface UserMapper {
             "WHERE USERNAME = #{username}")
     List<Role> getRolesByUsername(@Param("username") String username);
 
-    @Select("select SP.*\n" +
-            "from USER U\n" +
-            "         left join SYS_ROLE_USER SRU on U.ID = SRU.USER_ID\n" +
-            "         left join SYS_ROLE SR on SR.ID = SRU.ROLE_ID\n" +
-            "         left join SYS_PERMISSION_ROLE SPR on SRU.ROLE_ID = SPR.ROLE_ID\n" +
-            "         left join SYS_PERMISSION SP on SP.ID = SPR.PERMISSION_ID\n" +
-            "WHERE USERNAME = #{username}\n" +
-            "group by sp.ID")
-    List<Permission> getPermissionsByUsername(@Param("username") String username);
+    @Select({"<script>\n" +
+            "    select SP.*\n" +
+            "    from SYS_ROLE\n" +
+            "    left join SYS_PERMISSION_ROLE SPR on SYS_ROLE.ID = SPR.ROLE_ID\n" +
+            "    left join SYS_PERMISSION SP on SP.ID = SPR.PERMISSION_ID\n" +
+            "    where ROLE_ID in\n" +
+            "    <foreach item=\"role\" collection=\"roles\"\n" +
+            "             open=\"(\" separator=\",\" close=\")\">\n" +
+            "        #{role}\n" +
+            "    </foreach>\n" +
+            "</script>\n"})
+    List<Permission> getPermissionsByRoles(@Param("roles") List<Integer> roles);
 
     @Select("select * from SYS_PERMISSION")
     List<Permission> getAllPermissions();

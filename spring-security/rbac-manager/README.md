@@ -17,6 +17,9 @@
     - 用户表
     - 用户角色表、用户角色中间表
     - 访问资源表、角色资源中间表
+    - 初始化数据库后，创建用户
+    - 请保证第一个注册的用户为admin，第二个为普通用户，因为flyway初始化权限分配写死了
+
 - 一个用户可以拥有多个角色，一个角色可以拥有多个资源权限
 
 ## Role-Based Access Control
@@ -42,5 +45,13 @@
 ```java
 public class User implements UserDetails
 ```
-具体看源码
+具体看代码
 ##### 1.1.2 UserDetailsService实现
+```java
+public class CustomUserDetailsService implements UserDetailsService
+```
+具体看代码
+- 主要先用数据库加载用户信息
+- 从数据库加载角色信息
+- 根据角色信息加载资源权限信息
+- 最后返回```UserDetails```

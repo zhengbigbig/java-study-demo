@@ -31,8 +31,6 @@ public class User implements UserDetails {
     public User(String username, String encryptedPassword) {
         this.username = username;
         this.encryptedPassword = encryptedPassword;
-        this.createdAt = Instant.now();
-        this.updatedAt = Instant.now();
     }
 
     @Override
@@ -43,6 +41,10 @@ public class User implements UserDetails {
     @Override
     public String getPassword() {
         return encryptedPassword;
+    }
+
+    public String getPrePassword(){
+        return password;
     }
 
     @Override

@@ -37,25 +37,22 @@ create table sys_permission
     pid         int
 );
 
-insert into USER (USERNAME, ENCRYPTED_PASSWORD, CREATED_AT, UPDATED_AT)
-values ('admin','password',now(),now());
-
 insert into sys_role (role, name)
-values ('管理员', 'ROLE_ADMIN');
+values ( 'ADMIN','管理员');
 insert into sys_role (role, name)
-values ('普通用户', 'ROLE_USER');
+values ('USER','普通用户');
 
 insert into SYS_ROLE_USER (USER_ID, ROLE_ID)
 values (1, 1);
 insert into SYS_ROLE_USER (USER_ID, ROLE_ID)
-values (1, 2);
-insert into SYS_PERMISSION_ROLE (ROLE_ID, PERMISSION_ID)
-values (1, 1);
-insert into SYS_PERMISSION_ROLE (ROLE_ID, PERMISSION_ID)
-values (1, 2);
-insert into SYS_PERMISSION_ROLE (ROLE_ID, PERMISSION_ID)
 values (2, 2);
+
+insert into SYS_PERMISSION_ROLE (ROLE_ID, PERMISSION_ID)
+values (1, 1);
+insert into SYS_PERMISSION_ROLE (ROLE_ID, PERMISSION_ID)
+values (1, 2);
+
 insert into sys_permission (name, description, url, pid)
-values ('MANAGER', '管理', '/manager/**', null);
+values ('sys:log', '管理', '/syslog', null);
 insert into sys_permission (name, description, url, pid)
-values ('user', '用户个人信息', '/user/**', null);
+values ('sys:user', '管理', '/sysuser', null);
