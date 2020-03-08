@@ -16,8 +16,9 @@ public class BizpageController {
     }*/
 
     // 登录成功之后的首页
-    @GetMapping("/")
+    @GetMapping("/index")
     public String index() {
+        System.out.println(111);
         return "index";
     }
 

@@ -23,6 +23,7 @@
         <module>custom-login</module>
         <module>session</module>
         <module>rbac-manager</module>
+        <module>remember-me</module>
     </modules>
 
     <properties>
