@@ -49,3 +49,45 @@ kaptcha.textproducer.font.names=宋体,楷体,微软雅黑
 具体配置在```CaptchaConfig```
 
 ## 3. 验证码加载
+
+### 3.1 实现Controller
+- 用户图片验证码的生成和校验
+- 返回图片验证码给前端
+
+具体实现```KaptchaController```
+
+### 3.2 前端配置
+```html
+<img src="/kaptcha" id="kaptcha" width="110px" height="40px"/>
+
+<script>
+    window.onload=function(){
+        var kaptchaImg = document.getElementById("kaptcha");
+        kaptchaImg.onclick = function(){
+            // 加上随机数，避免缓存
+            kaptchaImg.src = "/kaptcha?" + Math.floor(Math.random() * 100)
+        }
+    }
+</script>
+```
+
+## 4. 验证码的校验
+
+### 4.1 自定义验证码过滤器
+
+- 自定义过滤器```KaptchaCodeFilter```中拦截登录请求
+- 过滤器中从session获取验证码文字与用户输入比对，比对通过执行其他过滤器链
+- 校验失败，则抛出```SessionAuthenticationException```异常，交给```AuthenticationFailureHandler```处理
+- 将过滤器放在```UsernamePasswordAuthenticationFilter```之前校验，最为合理
+
+### 4.2 实现```KaptchaFilter```
+
+- 实现自定义的过滤器，可以继承```Filter```，在spring中一般继承```OncePerRequestFilter```
+- 实现```KaptchaFilter```，对验证码进行校验，校验通过则执行后面的过滤链，失败则交给鉴权失败的handler来处理
+
+### 4.3 将过滤器在Spring Security配置
+
+```java
+        http
+                .addFilterBefore(kaptchaFilter, UsernamePasswordAuthenticationFilter.class);
+```

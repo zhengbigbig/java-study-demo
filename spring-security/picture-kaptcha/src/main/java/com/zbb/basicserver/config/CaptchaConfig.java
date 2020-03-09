@@ -4,12 +4,13 @@ import com.google.code.kaptcha.impl.DefaultKaptcha;
 import com.google.code.kaptcha.util.Config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import java.util.Properties;
 
-@Component
+@Configuration
 @PropertySource(value = {"classpath:kaptcha.properties"})
 public class CaptchaConfig {
 

@@ -1,9 +1,6 @@
 package com.zbb.basicserver.config;
 
-import com.zbb.basicserver.auth.CustomAuthenticationFailureHandler;
-import com.zbb.basicserver.auth.CustomAuthenticationSuccessHandler;
-import com.zbb.basicserver.auth.CustomExpiredSessionStrategy;
-import com.zbb.basicserver.auth.CustomLogoutSuccessHandler;
+import com.zbb.basicserver.auth.*;
 import com.zbb.basicserver.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
@@ -43,11 +41,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Resource
     private DataSource dataSource; // 对应yml中的数据库配置
 
+    @Resource
+    private KaptchaFilter kaptchaFilter;
+
     // http security 配置
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         // 禁用csrf ，否则会把所有请求当做非法请求拦截，后面再处理
         http
+                .addFilterBefore(kaptchaFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout()
                 .logoutUrl("/signout") // 退出调用，默认是/logout
                 // 退出成功后访问的页面
@@ -79,7 +81,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 // 需要放行的资源
-                .antMatchers("/login.html", "/login", "/auth/**", "/aftersignout.html").permitAll()
+                .antMatchers("/login.html", "/login", "/auth/**", "/aftersignout.html", "/kaptcha").permitAll()
                 // 权限表达式的使用和自定义
                 .antMatchers("/biz1").access("hasRole('ADMIN')")
                 .antMatchers("/biz2").hasRole("USER")
