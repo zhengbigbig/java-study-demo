@@ -1,8 +1,8 @@
-# Spring Security RememberMe
+# Spring Security RememberMe & logout
 
 说明： 紧接上文代码，后面不再赘述，包括数据库的初始化迁移都是一样
 
-## 1. 基本配置
+## 1. RememberMe基本配置
 
 ### 1.1 ```HttpSecurity```中配置
 
@@ -128,3 +128,52 @@ CREATE TABLE `persistent_logins`
 - 实现token重启容器依然有效
 
 
+## 2. Logout退出
+
+### 2.1 基本配置
+
+#### 2.1.1 Spring Security的配置
+```java
+@Configuration
+@EnableWebSecurity
+public class SecSecurityConfig extends WebSecurityConfigurerAdapter {
+ 
+    @Override
+    protected void configure(final HttpSecurity http) throws Exception {
+        http.logout();
+   }
+
+}
+```
+#### 2.1.2 前端配置
+```html
+<a href="/logout" >退出</a>
+```
+
+### 2.2 logout的默认行为
+
+- 当前session失效，即logout的核心，session失效就是访问权限的回收
+- 删除当前用户的remember-me 记住我 功能信息
+- clear SecurityContext
+- 重定向到登录页面，也就是loginPage配置项指定的页面
+
+### 2.3 登出的其他配置
+```java
+        http
+                .logout()
+                .logoutUrl("/signout") // 退出调用，默认是/logout
+                // 退出成功后访问的页面,和logoutSuccessHandler只能选一，否则后者失效
+//                .logoutSuccessUrl("/aftersignout.html")
+                // 删除Cookie
+                .deleteCookies("JSESSIONID")
+                // 和登录一样,登录成功后自定义处理或者跳转页面
+                .logoutSuccessHandler(customLogoutSuccessHandler)
+//                .addLogoutHandler(customLogoutHandler);
+```
+
+### 2.4 实现自定义的```LogoutSuccessHandler```
+```java
+public class CustomLogoutSuccessHandler implements LogoutSuccessHandler
+```
+
+可以在里面实现一些复杂的逻辑，譬如登出的ip等等一些需求。

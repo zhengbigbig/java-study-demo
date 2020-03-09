@@ -3,6 +3,7 @@ package com.zbb.basicserver.config;
 import com.zbb.basicserver.auth.CustomAuthenticationFailureHandler;
 import com.zbb.basicserver.auth.CustomAuthenticationSuccessHandler;
 import com.zbb.basicserver.auth.CustomExpiredSessionStrategy;
+import com.zbb.basicserver.auth.CustomLogoutSuccessHandler;
 import com.zbb.basicserver.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,6 +35,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     CustomExpiredSessionStrategy customExpiredSessionStrategy;
 
     @Resource
+    CustomLogoutSuccessHandler customLogoutSuccessHandler;
+
+    @Resource
     CustomUserDetailsService customUserDetailsService;
 
     @Resource
@@ -44,6 +48,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         // 禁用csrf ，否则会把所有请求当做非法请求拦截，后面再处理
         http
+                .logout()
+                .logoutUrl("/signout") // 退出调用，默认是/logout
+                // 退出成功后访问的页面
+//                .logoutSuccessUrl("/aftersignout.html")
+                // 删除Cookie
+                .deleteCookies("JSESSIONID")
+                .logoutSuccessHandler(customLogoutSuccessHandler)
+
+                .and()
                 .rememberMe()
                 .userDetailsService(customUserDetailsService)
                 .rememberMeParameter("remember-me") // 接受客户端的参数
@@ -66,7 +79,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 // 需要放行的资源
-                .antMatchers("/login.html", "/login", "/auth/**").permitAll()
+                .antMatchers("/login.html", "/login", "/auth/**", "/aftersignout.html").permitAll()
                 // 权限表达式的使用和自定义
                 .antMatchers("/biz1").access("hasRole('ADMIN')")
                 .antMatchers("/biz2").hasRole("USER")
