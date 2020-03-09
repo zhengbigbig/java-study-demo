@@ -1,0 +1,30 @@
+server:
+  port: 8888
+  servlet:
+    session:
+      timeout: 10s
+      cookie:
+        http-only: true
+        secure: false
+
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  freemarker:
+    cache: false # 缓存配置 开发阶段应该配置为false 因为经常会改
+    suffix: .html # 模版后缀名 默认为ftl
+    charset: UTF-8 # 文件编码
+    template-loader-path: classpath:/templates/
+  security:
+    loginType: JSON
+
+  datasource:
+    # 请使用绝对路径
+    url: jdbc:h2:file:/Users/zhengzhiheng/Desktop/java_study_demo/spring-security/remember-me/target/test
+    username: root
+    password: my-secret-pw
+    driver-class-name: org.h2.Driver
+mybatis:
+  configuration:
+    mapUnderscoreToCamelCase: true

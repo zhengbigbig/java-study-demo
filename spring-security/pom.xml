@@ -24,6 +24,7 @@
         <module>session</module>
         <module>rbac-manager</module>
         <module>remember-me</module>
+        <module>picture-kaptcha</module>
     </modules>
 
     <properties>
