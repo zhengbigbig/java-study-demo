@@ -10,10 +10,10 @@
         <relativePath/>
     </parent>
 
-    <artifactId>picture-kaptcha</artifactId>
+    <artifactId>sms-login</artifactId>
     <version>1.0</version>
-    <name>picture-kaptcha</name>
-    <description>Spring Security picture-kaptcha</description>
+    <name>sms-login</name>
+    <description>Spring Security sms-login</description>
     <packaging>jar</packaging>
 
     <properties>

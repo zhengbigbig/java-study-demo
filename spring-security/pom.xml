@@ -25,6 +25,7 @@
         <module>rbac-manager</module>
         <module>remember-me</module>
         <module>picture-kaptcha</module>
+        <module>sms-login</module>
     </modules>
 
     <properties>
