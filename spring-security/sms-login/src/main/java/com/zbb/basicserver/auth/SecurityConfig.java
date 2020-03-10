@@ -1,6 +1,7 @@
-package com.zbb.basicserver.config;
+package com.zbb.basicserver.auth;
 
 import com.zbb.basicserver.auth.*;
+import com.zbb.basicserver.auth.kaptcha.KaptchaFilter;
 import com.zbb.basicserver.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

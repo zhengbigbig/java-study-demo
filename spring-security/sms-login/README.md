@@ -3,8 +3,9 @@
 ## 1. 开发流程
 
 1. 定义```SmsController```，获取短信验证码，将短信验证码保存到session，并将短信验证码下发给用户
-2. 自定义短信验证码过滤器```SmsValidateFilter```对用户输入进行校验
-3. 自定义短信验证码登录的过滤器```SmsAuthenticationFilter```进行权限校验
+2. 自定义短信验证码过滤器```SmsValidateFilter```对用户输入进行校验，
+过滤通过后应该仿照用户登录授权来实现一套短信验证码寿宴
+3. 自定义短信验证码登录的过滤器```SmsAuthenticationFilter```进行权限校验，并实现相应的provider
 
 ## 2. 实现(根据业务实际需求，可在注册时要求填写手机号或者后续做绑定，再用作短信登录)
 
@@ -20,4 +21,8 @@ alter table USER
 
 ### 2.2 实现```SmsValidateFilter```，实际与图片验证码的过滤器相似
 
-### 2.3 
+### 2.3 仿照```UsernamePasswordAuthenticationToken```，实现传递的```SmsCodeAuthenticationToken```
+
+### 2.4 仿照```UsernamePasswordAuthenticationFilter```，实现权限过滤器```SmsCodeAuthenticationFilter```
+
+### 2.5 继承```AuthenticationProvider```，实现```SmsCodeAuthenticationProvider```

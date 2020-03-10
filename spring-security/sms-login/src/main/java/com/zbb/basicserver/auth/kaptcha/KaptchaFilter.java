@@ -1,5 +1,6 @@
-package com.zbb.basicserver.auth;
+package com.zbb.basicserver.auth.kaptcha;
 
+import com.zbb.basicserver.auth.CustomAuthenticationFailureHandler;
 import com.zbb.basicserver.entity.KaptchaImageVO;
 import com.zbb.basicserver.utils.Constants;
 import org.apache.commons.lang3.StringUtils;

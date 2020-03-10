@@ -1,5 +1,6 @@
-package com.zbb.basicserver.auth;
+package com.zbb.basicserver.auth.sms;
 
+import com.zbb.basicserver.auth.CustomAuthenticationFailureHandler;
 import com.zbb.basicserver.dao.UserMapper;
 import com.zbb.basicserver.entity.SmsCode;
 import com.zbb.basicserver.entity.User;

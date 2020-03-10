@@ -1,4 +1,4 @@
-package com.zbb.basicserver.config;
+package com.zbb.basicserver.auth.kaptcha;
 
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import com.google.code.kaptcha.util.Config;
