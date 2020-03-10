@@ -17,4 +17,7 @@ alter table USER
 
 ```
 将短信发送相关接口也```PermitAll``
-### 2.2 
+
+### 2.2 实现```SmsValidateFilter```，实际与图片验证码的过滤器相似
+
+### 2.3 

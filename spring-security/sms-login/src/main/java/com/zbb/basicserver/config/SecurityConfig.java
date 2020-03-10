@@ -81,7 +81,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 // 需要放行的资源
-                .antMatchers("/login.html", "/login", "/auth/**", "/aftersignout.html", "/kaptcha","/sms").permitAll()
+                .antMatchers("/login.html", "/login", "/auth/**", "/aftersignout.html", "/kaptcha","/sms","smslogin").permitAll()
                 // 权限表达式的使用和自定义
                 .antMatchers("/biz1").access("hasRole('ADMIN')")
                 .antMatchers("/biz2").hasRole("USER")

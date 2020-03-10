@@ -4,6 +4,7 @@ import com.zbb.basicserver.dao.UserMapper;
 import com.zbb.basicserver.entity.AuthResult;
 import com.zbb.basicserver.entity.SmsCode;
 import com.zbb.basicserver.entity.User;
+import com.zbb.basicserver.utils.Constants;
 import lombok.extern.java.Log;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,8 +37,8 @@ public class SmsController {
         //TODO 此处调用验证码发送服务接口
         log.info(smsCode.getCode() + "=》" + phone);
 
-        session.setAttribute("sms_key", smsCode);
+        session.setAttribute(Constants.SMS_SESSION_KEY, smsCode);
 
-        return AuthResult.success("短信息已经发送到您的手机: ",phone);
+        return AuthResult.success("短信息已经发送到您的手机: ", phone);
     }
 }
