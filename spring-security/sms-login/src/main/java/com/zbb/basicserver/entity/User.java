@@ -68,4 +68,11 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return enabled;
     }
+
+    // 简单起见，使用enabled字段
+    // 需要注意的是mysql并没有boolean类型，int或tinyint类型，1就是true，0就是false。
+    public void setAccountNonLocked(boolean accountNonLocked){
+        this.accountNonLocked = accountNonLocked;
+        this.enabled = accountNonLocked;
+    }
 }

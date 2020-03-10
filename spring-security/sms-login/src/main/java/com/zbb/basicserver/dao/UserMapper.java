@@ -3,10 +3,7 @@ package com.zbb.basicserver.dao;
 import com.zbb.basicserver.entity.Permission;
 import com.zbb.basicserver.entity.Role;
 import com.zbb.basicserver.entity.User;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -21,6 +18,10 @@ public interface UserMapper {
             "from USER where USERNAME = #{username} or PHONE = #{username}")
     User findUserByUsername(@Param("username") String username);
 
+    @Update({" UPDATE sys_user u" +
+            "  SET u.enabled = #{enabled}" +
+            " WHERE u.username = #{username} or u.phone = #{username}" })
+    int updateEnabledByUsername(User user);
 
     @Select("select SR.*\n" +
             "from USER U\n" +
@@ -54,4 +55,6 @@ public interface UserMapper {
 
     @Select("select * from SYS_PERMISSION")
     List<Permission> getAllPermissions();
+
+
 }

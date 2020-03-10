@@ -48,6 +48,15 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.9</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/es.moki.ratelimitj/ratelimitj-inmemory -->
+        <dependency>
+            <groupId>es.moki.ratelimitj</groupId>
+            <artifactId>ratelimitj-inmemory</artifactId>
+            <version>0.5.0</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
