@@ -19,7 +19,7 @@
 
 <h1>短信登陆</h1>
 <form action="/smslogin" method="post">
-    <span>手机号码：</span><input type="text" name="mobile" id="mobile"> <br>
+    <span>手机号码：</span><input type="text" name="phone" id="phone"> <br>
     <span>短信验证码：</span><input type="text" name="smsCode" id="smsCode" >
     <input type="button" onclick="getSmsCode()" value="获取"><br>
     <input type="button" onclick="smslogin()" value="登陆">
@@ -72,16 +72,12 @@
     function getSmsCode() {
         $.ajax({
             type: "get",
-            url: "/smscode",
+            url: "/sms",
             data: {
-                "mobile": $("#mobile").val()
+                "phone": $("#phone").val()
             },
             success: function (json) {
-                if(json.isok){
-                    alert(json.data)
-                }else{
-                    alert(json.message)
-                }
+                console.log(json)
             },
             error: function (e) {
                 console.log(e.responseText);
@@ -90,9 +86,9 @@
     }
 
     function smslogin() {
-        var mobile = $("#mobile").val();
+        var phone = $("#phone").val();
         var smsCode = $("#smsCode").val();
-        if (mobile === "" || smsCode === "") {
+        if (phone === "" || smsCode === "") {
             alert('手机号和短信验证码均不能为空');
             return;
         }
@@ -100,15 +96,12 @@
             type: "POST",
             url: "/smslogin",
             data: {
-                "mobile": mobile,
+                "phone": phone,
                 "smsCode": smsCode
             },
             success: function (json) {
-                if(json.isok){
-                    location.href = json.data;
-                }else{
-                    alert(json.message)
-                }
+                alert(JSON.stringify(json))
+                location.href = "/index";
             },
             error: function (e) {
                 console.log(e.responseText);

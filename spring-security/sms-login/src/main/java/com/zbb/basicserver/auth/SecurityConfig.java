@@ -1,7 +1,7 @@
 package com.zbb.basicserver.auth;
 
-import com.zbb.basicserver.auth.*;
 import com.zbb.basicserver.auth.kaptcha.KaptchaFilter;
+import com.zbb.basicserver.auth.sms.SmsCodeSecurityConfig;
 import com.zbb.basicserver.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,6 +45,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Resource
     private KaptchaFilter kaptchaFilter;
 
+    @Resource
+    private SmsCodeSecurityConfig smsCodeSecurityConfig;
+
     // http security 配置
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -78,11 +81,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .successHandler(customAuthenticationSuccessHandler)
 //                .failureUrl("/login.html")
                 .failureHandler(customAuthenticationFailureHandler)
-
+                .and().apply(smsCodeSecurityConfig)
                 .and()
                 .authorizeRequests()
                 // 需要放行的资源
-                .antMatchers("/login.html", "/login", "/auth/**", "/aftersignout.html", "/kaptcha","/sms","smslogin").permitAll()
+                .antMatchers("/login.html", "/login", "/auth/**", "/aftersignout.html", "/kaptcha", "/sms", "smslogin").permitAll()
                 // 权限表达式的使用和自定义
                 .antMatchers("/biz1").access("hasRole('ADMIN')")
                 .antMatchers("/biz2").hasRole("USER")

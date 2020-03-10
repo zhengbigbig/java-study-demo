@@ -10,6 +10,6 @@ public class Constants {
 
     public static final String SMS_SESSION_KEY = "sms_key";
     public static final String SMS_REQUEST_KEY = "smsCode";
-    public static final String SMS_REQUEST_PHONE_NAME = "mobile";
+    public static final String SMS_REQUEST_PHONE_NAME = "phone";
 
 }

@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class SmsCodeAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-    public static final String SPRING_SECURITY_FORM_MOBILE_KEY = "mobile";
+    public static final String SPRING_SECURITY_FORM_MOBILE_KEY = "phone";
     private String mobileParameter = SPRING_SECURITY_FORM_MOBILE_KEY;    //请求中携带手机号的参数名称
     private boolean postOnly = true;    //指定当前过滤器是否只处理POST请求
 

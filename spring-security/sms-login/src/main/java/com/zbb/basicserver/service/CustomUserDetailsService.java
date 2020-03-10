@@ -33,7 +33,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException(username + "不存在！");
         }
         // 加载用户角色信息
-        List<Role> roleList = userMapper.getRolesByUsername(username);
+        List<Role> roleList = userMapper.getRolesByUsername(user.getUsername());
 
         // 通过角色信息加载用户资源权限列表
         List<Permission> permissions = userMapper.getPermissionsByRoles(

@@ -49,7 +49,8 @@ public class AuthController {
         try {
             userMapper.createUser(
                     registerUser.getUsername(),
-                    passwordEncoder.encode(registerUser.getPrePassword()));
+                    passwordEncoder.encode(registerUser.getPrePassword()),
+                    registerUser.getPhone());
         } catch (Exception e) {
             log.info("用户注册失败: " + e.getMessage());
             return AuthResult.failure("注册失败");

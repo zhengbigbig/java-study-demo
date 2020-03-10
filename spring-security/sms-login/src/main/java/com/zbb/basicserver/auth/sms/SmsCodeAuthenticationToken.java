@@ -12,9 +12,9 @@ public class SmsCodeAuthenticationToken extends AbstractAuthenticationToken {
     //存放认证信息，认证之前存放手机号，认证之后存放登录的用户
     private final Object principal;
 
-    public SmsCodeAuthenticationToken(String mobile) {
+    public SmsCodeAuthenticationToken(String phone) {
         super(null);
-        this.principal = mobile;
+        this.principal = phone;
         this.setAuthenticated(false);
     }
 
