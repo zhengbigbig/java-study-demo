@@ -9,15 +9,27 @@
 
 1. httpBasic 模式登录认证
 - http-basic
+
 2. formLogin 模式登录认证
 - form-login
+
 3. customLogin 自定义登录处理
 - custom-login
+
 4. sessionManager session管理
 - session
+
 5. RBAC 权限管理
 - rbac-manager
+
 6. RememberMe 记住密码 & 登出
 - remember-me
+
 7. 基于session的图片验证码实现
-- picture-code
+- picture-kaptcha
+
+8. 短信验证码登录 & 多次失败登录锁定用户
+- sms-login
+
+9. Spring Security JWT
+- jwt

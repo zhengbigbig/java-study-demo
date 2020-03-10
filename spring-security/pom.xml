@@ -26,6 +26,7 @@
         <module>remember-me</module>
         <module>picture-kaptcha</module>
         <module>sms-login</module>
+        <module>jwt</module>
     </modules>
 
     <properties>
