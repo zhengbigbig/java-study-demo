@@ -27,6 +27,7 @@
         <module>picture-kaptcha</module>
         <module>sms-login</module>
         <module>jwt</module>
+        <module>spring-social</module>
     </modules>
 
     <properties>

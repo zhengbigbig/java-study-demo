@@ -1,0 +1,10 @@
+#需要使用的配置文件
+spring:
+  profiles:
+    active: dev
+
+# 实际生产中通常不直接写在配置文件里面,而是通过应用的启动参数传递，并且需要定期修改。
+jwt:
+  header: JWTHeaderName # 可自定义，一般是Authorization：Bearer [token]
+  secret: aabbccdd
+  expiration: 3600000
