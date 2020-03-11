@@ -1,12 +1,10 @@
 package com.zbb.basicserver.auth;
 
-import com.zbb.basicserver.auth.kaptcha.KaptchaFilter;
-import com.zbb.basicserver.auth.sms.SmsCodeSecurityConfig;
+import com.zbb.basicserver.auth.token.JwtAuthenticationTokenFilter;
 import com.zbb.basicserver.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -25,13 +23,6 @@ import javax.sql.DataSource;
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    @Resource // Resource和Autowired的区别是前者按照名称（byName）来装配，后者按照类型（byType）装配
-            CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
-    @Resource
-    CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
-
-    @Resource
-    CustomExpiredSessionStrategy customExpiredSessionStrategy;
 
     @Resource
     CustomLogoutSuccessHandler customLogoutSuccessHandler;
@@ -43,17 +34,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private DataSource dataSource; // 对应yml中的数据库配置
 
     @Resource
-    private KaptchaFilter kaptchaFilter;
-
-    @Resource
-    private SmsCodeSecurityConfig smsCodeSecurityConfig;
+    private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
 
     // http security 配置
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         // 禁用csrf ，否则会把所有请求当做非法请求拦截，后面再处理
-        http
-                .addFilterBefore(kaptchaFilter, UsernamePasswordAuthenticationFilter.class)
+        http.csrf().disable()
                 .logout()
                 .logoutUrl("/signout") // 退出调用，默认是/logout
                 // 退出成功后访问的页面
@@ -62,29 +49,23 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .deleteCookies("JSESSIONID")
                 .logoutSuccessHandler(customLogoutSuccessHandler)
 
-                .and()
-                .rememberMe()
-                .userDetailsService(customUserDetailsService)
+                .and().rememberMe()
                 .rememberMeParameter("remember-me") // 接受客户端的参数
                 .rememberMeCookieName("remember-me-cookie") // 返回给浏览器的cookie名称
                 .tokenValiditySeconds(2 * 24 * 60 * 60) // remember-me token有效时间
                 .tokenRepository(persistentTokenRepository())
 
                 .and()
-                .csrf().disable()
-                .apply(smsCodeSecurityConfig)
-                .and()
                 .authorizeRequests()
                 // 需要放行的资源
-                .antMatchers("/login.html", "/login", "/auth/**", "/aftersignout.html", "/kaptcha", "/sms", "smslogin").permitAll()
+                .antMatchers( "/authentication", "/refreshtoken","/auth/**").permitAll()
                 // 权限表达式的使用和自定义
-                .antMatchers("/biz1").access("hasRole('ADMIN')")
-                .antMatchers("/biz2").hasRole("USER")
                 .anyRequest().access("@rbacService.hasPermission(request,authentication)");
 
         http
                 .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+                .addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
     }
 
     // 配置webSecurity ignore 掉的 是不会走资源拦截器或者过滤器的 也就是FilterSecurityInterceptor等
@@ -96,24 +77,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/css/**", "/fonts/**", "/img/**", "/js/**");
     }
 
-    // 鉴权管理
+    // 鉴权管理,配置customUserDetailsService为全局的
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(daoAuthenticationProvider());
+        auth.userDetailsService(customUserDetailsService)
+                .passwordEncoder(passwordEncoder());
     }
 
     @Bean
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
-    }
-
-    @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider() {
-        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-        daoAuthenticationProvider.setUserDetailsService(customUserDetailsService);
-        return daoAuthenticationProvider;
     }
 
     // 设置加密

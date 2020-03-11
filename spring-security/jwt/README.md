@@ -46,5 +46,26 @@ cookies和sessionid是服务端和浏览器端自行维护，编码层面开发�
 ```
 
 4. 实现```JwtAuthService```，核心业务逻辑
+- 登录用户鉴权
+- 通过后，将```Authentication```保存到上下文
+- 加载用户信息，生成token
+- token过期，刷新token
 
-5. 实现
+5. 实现```JwtAuthenticationTokenFilter```对需要鉴权的接口过滤
+
+- 先确定请求头有无token
+- 若无，执行下一个过滤器，若有，解签token，查看是否有用户信息，和判断当前上下文有没有保存用户信息
+- 若token中有用户信息且上下文没有保存，则从数据库加载用户信息
+- 校验token的有效性，若有效，则组装```UsernamePasswordAuthenticationToken```，并设置到上下文
+- 最后执行下一个过滤器
+
+6. 总结流程
+
+- 用户访问权限接口，若没有有效token，则提示先登录
+- 登录后，返回token，这个token是保存在客户端的，服务器下发后，无法控制
+- 再次访问权限接口，若token校验通过，则可访问，若失败，则被后续过滤器异常捕获
+- 抛出异常，客户端刷新token
+
+
+## 使用postman进行测试
+
