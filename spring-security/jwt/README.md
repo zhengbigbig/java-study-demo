@@ -117,3 +117,60 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 ```
 
+## 5. CSRF跨站攻击防护
+
+### 5.1 如何防御CSRF攻击
+
+- 为系统中的每一个连接请求加上一个token，这个token是随机的，服务端对该token进行验证。
+- 跳转提醒，点击第三方连接，提醒用户
+
+### 5.2 Spring Security的CSRF token攻击防护
+
+```java
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.csrf()
+            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+            .ignoringAntMatchers("/authentication");
+        .and()
+        ...
+    }
+}
+```
+
+- 使用CookieCsrfTokenRepository生成CSRF Token放入cookie，并设置cookie的HttpOnly=false，允许读取该cookie。
+这样非浏览器等无法自动维护cookie的客户端可以读取cookie中的CSRF Token，以供后续资源请求中使用
+- 使用ignoringAntMatchers开放一些不需要进行CSRF防护的访问路径，比如：登录授权。
+
+至此，我们生成了CSRF token保存在了cookies中，浏览器向服务端发送的HTTP请求，都要将CSRF token带上，服务端校验通过才能正确的响应。
+这个校验的过程Spring Security会自动处理。
+
+### 5.3 前端请求携带CSRF Token的方式
+
+- 在thymeleaf模板中可以使用如下方式，其他类似
+
+#### 5.3.1 在Header中携带CSRF token
+
+```js
+var headers = {};
+headers['X-CSRF-TOKEN'] = "${_csrf.token}";
+$.ajax({    
+    headers: headers,    
+});
+```
+#### 5.3.2 直接作为参数提交
+
+```js
+$.ajax({    
+    data: {      
+       "_csrf": "${_csrf.token}"        
+    }
+});
+```
+
+#### 5.3.3 form表单的隐藏字段
+
+```html
+<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+```
