@@ -16,9 +16,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
+import java.util.Arrays;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -41,6 +45,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         // 禁用csrf ，否则会把所有请求当做非法请求拦截，后面再处理
         http.csrf().disable()
+                .cors().and()
                 .logout()
                 .logoutUrl("/signout") // 退出调用，默认是/logout
                 // 退出成功后访问的页面
@@ -58,7 +63,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 // 需要放行的资源
-                .antMatchers( "/authentication", "/refreshtoken","/auth/**").permitAll()
+                .antMatchers("/authentication", "/refreshtoken", "/auth/**").permitAll()
                 // 权限表达式的使用和自定义
                 .anyRequest().access("@rbacService.hasPermission(request,authentication)");
 
@@ -102,5 +107,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         JdbcTokenRepositoryImpl tokenRepository = new JdbcTokenRepositoryImpl();
         tokenRepository.setDataSource(dataSource);
         return tokenRepository;
+    }
+
+    // 配置跨域
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        //开放哪些ip、端口、域名的访问权限，星号表示开放所有域
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8888"));
+        //是否允许发送Cookie信息
+        configuration.setAllowCredentials(true);
+        //开放哪些Http方法，允许跨域访问
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
+        //允许HTTP请求中的携带哪些Header信息
+        //暴露哪些头部信息（因为跨域访问默认不能获取全部头部信息）
+        configuration.applyPermitDefaultValues();
+        //添加映射路径，“/**”表示对所有的路径实行全局跨域访问权限的设置
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

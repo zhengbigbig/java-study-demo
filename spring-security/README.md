@@ -31,5 +31,5 @@
 8. 短信验证码登录 & 多次失败登录锁定用户
 - sms-login
 
-9. Spring Security JWT
+9. Spring Security JWT && CORS && CSRF && JWT集群
 - jwt

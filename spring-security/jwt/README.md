@@ -1,4 +1,4 @@
-# Spring Security JWT
+# Spring Security JWT && CORS && CSRF && JWT集群
 
 ## 1. JWT介绍
 
@@ -68,4 +68,52 @@ cookies和sessionid是服务端和浏览器端自行维护，编码层面开发�
 
 
 ## 使用postman进行测试
+
+## 4. CORS
+
+### 4.1 在Spring或Spring Boot实现跨域资源共享
+
+主要四种实现方式：
+
+1. @CrossOrigin注解，这个注解是作用于Controller类或者请求方法上的，实现局部接口的跨域资源共享。
+2. 实现WebMvcConfigurer接口addCorsMappings方法，实现全局配置的跨域资源共享。
+3. 注入CorsFilter过滤器，实现全局配置的跨域资源共享。推荐使用。
+4. 使用HttpServletResponse设置响应头(局部跨域配置)，不推荐
+
+### 4.2 Spring Security 中的配置CORS
+
+首先配置http.cors()
+```java
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.cors().and()
+        ...
+    }
+}
+```
+
+再配置Spring Security提供的```CorsConfigurationSource```，等同于注入```CorsFilter```过滤器
+
+```java
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        //开放哪些ip、端口、域名的访问权限，星号表示开放所有域
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8888"));
+        //是否允许发送Cookie信息
+        configuration.setAllowCredentials(true);
+        //开放哪些Http方法，允许跨域访问
+        configuration.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "DELETE"));
+        //允许HTTP请求中的携带哪些Header信息
+        configuration.addAllowedHeader("*");
+        //暴露哪些头部信息（因为跨域访问默认不能获取全部头部信息）
+        configuration.addExposedHeader("*");
+        configuration.applyPermitDefaultValues();
+        //添加映射路径，“/**”表示对所有的路径实行全局跨域访问权限的设置
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+```
 
