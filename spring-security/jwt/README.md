@@ -174,3 +174,9 @@ $.ajax({
 ```html
 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
 ```
+
+## 6. JWT集群应用方案
+
+- 上文使用JWT做授权服务，实际上，token是没用保存在服务端的，因此，分布式部署做集群时，
+只需要保证使用同一套代码和同一套签名、同一个数据库
+- 当然若是要实现其他的一些功能，譬如token的管理，则需要服务端保存token，可以使用redis/数据库等等
