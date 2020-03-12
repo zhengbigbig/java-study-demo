@@ -4,7 +4,6 @@ import com.zbb.basicserver.dao.UserMapper;
 import com.zbb.basicserver.entity.AuthResult;
 import com.zbb.basicserver.entity.User;
 import lombok.extern.java.Log;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -60,12 +59,6 @@ public class AuthController {
         }
         return AuthResult.success("注册成功", null);
 
-    }
-
-    @GetMapping("/callback")
-    public void callback(@Param("code") String code){
-        System.out.println(code);
-        System.out.println("------");
     }
 
 }

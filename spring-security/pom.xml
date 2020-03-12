@@ -28,6 +28,7 @@
         <module>sms-login</module>
         <module>jwt</module>
         <module>spring-social</module>
+        <module>spring-security-oauth2</module>
     </modules>
 
     <properties>

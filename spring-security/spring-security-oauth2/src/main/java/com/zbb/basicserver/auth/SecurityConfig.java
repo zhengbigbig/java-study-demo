@@ -29,6 +29,10 @@ import java.util.Arrays;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    private static final String[] ignoreAuthUrl =
+            {"/authentication", "/refreshtoken", "/auth/**", "/oauth/**",
+                    "/favicon.ico","/error"};
+
     @Resource
     CustomLogoutSuccessHandler customLogoutSuccessHandler;
 
@@ -47,7 +51,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // 禁用csrf ，否则会把所有请求当做非法请求拦截，后面再处理
         http.csrf()
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .ignoringAntMatchers("/authentication", "/refreshtoken", "/auth/**","/callback")
+                .ignoringAntMatchers(ignoreAuthUrl)
                 .and()
                 .cors().and()
                 .logout()
@@ -67,7 +71,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 // 需要放行的资源
-                .antMatchers("/authentication", "/refreshtoken", "/auth/**","/callback").permitAll()
+                .antMatchers(ignoreAuthUrl).permitAll()
                 // 权限表达式的使用和自定义
                 .anyRequest().access("@rbacService.hasPermission(request,authentication)");
 
@@ -89,6 +93,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     // 鉴权管理,配置customUserDetailsService为全局的
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        // 这样写，默认使用DaoAuthenticationProvider
         auth.userDetailsService(customUserDetailsService)
                 .passwordEncoder(passwordEncoder());
     }

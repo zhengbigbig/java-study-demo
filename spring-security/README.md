@@ -33,3 +33,9 @@
 
 9. Spring Security JWT && CORS && CSRF && JWT集群
 - jwt
+
+10. Spring Social 
+- spring-social
+
+11. Spring Security Oauth2
+- spring-security-oauth2
