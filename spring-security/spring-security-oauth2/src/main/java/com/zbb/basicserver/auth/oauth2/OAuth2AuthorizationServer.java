@@ -33,7 +33,7 @@ public class OAuth2AuthorizationServer extends AuthorizationServerConfigurerAdap
         clients.inMemory()
                 .withClient("client1").secret(passwordEncoder.encode("123456")) // Client 账号、密码。
                 .redirectUris("http://localhost:8888/callback") // 配置回调地址，选填。
-                .authorizedGrantTypes("authorization_code","password") // 授权码模式
+                .authorizedGrantTypes("authorization_code", "password", "implicit","client_credentials") // 授权码模式
                 .scopes("all"); // 可授权的 Scope
     }
 
@@ -41,6 +41,7 @@ public class OAuth2AuthorizationServer extends AuthorizationServerConfigurerAdap
      * 请求/oauth/token的，
      * 如果配置支持allowFormAuthenticationForClients的，且url中有client_id和client_secret的会走ClientCredentialsTokenEndpointFilter
      * 如果没有支持allowFormAuthenticationForClients或者有支持但是url中没有client_id和client_secret的，走basic认证
+     *
      * @param oauthServer
      * @throws Exception
      */

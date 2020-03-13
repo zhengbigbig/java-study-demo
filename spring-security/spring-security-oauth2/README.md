@@ -158,6 +158,28 @@ curl -X POST --user client1:123456 http://localhost:8001/oauth/token -H "accept:
 ### 2.2 简化模式
 
 - 简化模式是授权码模式的“简化”，所以只需要在以上配置的基础上，为authorizedGrantTypes加上implicit配置即可。
+- 与授权码模式相比，少了获取code那步
 
+测试：
+```shell script
+http://localhost:8001/oauth/authorize?client_id=client1&redirect_uri=http://localhost:8888/callback&response_type=token
+```
+返回结果
+```shell script
+http://localhost:8888/callback#access_token=2302706d-1279-42bb-a347-70bd2dd0eae3&token_type=bearer&expires_in=43199&scope=all
+```
 
+### 2.3 客户端模式
 
+- 客户端模式实际上是密码模式的简化，无需配置或使用资源拥有者账号。因为它没有用户的概念，直接与授权服务器交互，通过 Client 的编号(client_id)和密码(client_secret)来保证安全性。
+- 配置方式为authorizedGrantTypes加上client_credentials配置即可。
+
+测试
+```shell script
+curl -X POST "http://localhost:8001/oauth/token"  --user client1:123456  -d "grant_type=client_credentials&scope=all"
+```
+
+返回：
+```shell script
+{"access_token":"2e25e838-f47b-44b3-847e-d96ed01a81af","token_type":"bearer","expires_in":43199,"scope":"all"}%
+```
