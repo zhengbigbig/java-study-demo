@@ -64,7 +64,7 @@ public class OAuth2AuthorizationServer extends AuthorizationServerConfigurerAdap
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         clients.inMemory()
                 .withClient("client1").secret(passwordEncoder.encode("123456")) // Client 账号、密码。
-                .redirectUris("http://localhost:8888/callback") // 配置回调地址，选填。
+                .redirectUris("http://localhost:8003/login") // 配置回调地址，选填。
                 .authorizedGrantTypes("authorization_code", "refresh_token", "password", "implicit", "client_credentials") // 授权码模式
                 .scopes("all") // 可授权的 Scope
                 .accessTokenValiditySeconds(7 * 24 * 60 * 60)

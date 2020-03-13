@@ -32,7 +32,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private static final String[] ignoreAuthUrl =
             {"/authentication", "/refreshtoken", "/auth/**", "/oauth/**",
-                    "/favicon.ico","/error"};
+                    "/favicon.ico","/error","oauth/check_token"};
 
     @Resource
     CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
