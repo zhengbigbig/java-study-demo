@@ -236,4 +236,51 @@ http://localhost:8001/oauth/token?grant_type=refresh_token&refresh_token=8495d59
 
 ```
 
+## 4. 实现资源服务器
+
+- 授权服务器和资源服务器在一块，Token信息存在内存中，二者都可以使用，认证服务器发放AccessToken，并将其保存在内存里面；资源服务器可以获取内存中的AccessToken，进行资源的访问鉴权。
+- 若俩则分开，则需要通过其他的手段使得共享Token
+
+### 4.1 配置资源服务器
+
+```java
+@Configuration
+@EnableResourceServer // 针对OAuth2的ResourceServer资源服务器的配置
+public class OAuth2ResourceServer extends ResourceServerConfigurerAdapter {
+
+    @Override
+    public void configure(HttpSecurity http) throws Exception {
+        http.authorizeRequests()
+             .anyRequest().authenticated()
+             .and()
+             .requestMatchers()
+             .antMatchers("/api/**"); // 对任何“/api/**”接口的访问，都必须经过OAuth2认证服务器认证
+    }
+
+}
+```
+
+### 4.2 授权后访问资源
+
+#### 使用AccessToken访问资源
+
+```shell script
+curl -X GET http://localhost:8001/api/hello -H "authorization: Bearer f8ca9609-2c86-476e-a336-1c69d4b3fd2a"
+```
+
+- 通过HTTP协议的请求头携带AccessToken
+- HTTP请求头的Key是authorization，固定写法。
+- AccessToken默认的类型是Bearer ，可自定义。
+
+返回：
+- 正确：Hello Oauth2 Resource Server
+- 错误： {"error":"invalid_token","error_description":"Invalid access token: 305f9638-95b0-404f-83d3-b88800e"}
+
+
+
+
+
+
+
+
 
