@@ -1,6 +1,8 @@
 package com.zbb.basicserver.auth.oauth2;
 
+import com.zbb.basicserver.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -22,26 +24,39 @@ public class OAuth2AuthorizationServer extends AuthorizationServerConfigurerAdap
     @Resource
     PasswordEncoder passwordEncoder;
 
-    @Override
-    public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
-        security
-                .tokenKeyAccess("permitAll()")
-                .checkTokenAccess("permitAl()")
-                .allowFormAuthenticationForClients();
-    }
+    @Resource
+    private AuthenticationManager authenticationManager;
 
     // 客户端配置信息
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         clients.inMemory()
-                .withClient("client1").secret(passwordEncoder.encode("123456"))
-                .redirectUris("http://localhost:8888/callback") // 配置回调地址，选填
-                .authorizedGrantTypes("authorization_code") // 授权码模式
-                .scopes("all"); // 授权范围
+                .withClient("client1").secret(passwordEncoder.encode("123456")) // Client 账号、密码。
+                .redirectUris("http://localhost:8888/callback") // 配置回调地址，选填。
+                .authorizedGrantTypes("authorization_code","password") // 授权码模式
+                .scopes("all"); // 可授权的 Scope
     }
+
+    /**
+     * 请求/oauth/token的，
+     * 如果配置支持allowFormAuthenticationForClients的，且url中有client_id和client_secret的会走ClientCredentialsTokenEndpointFilter
+     * 如果没有支持allowFormAuthenticationForClients或者有支持但是url中没有client_id和client_secret的，走basic认证
+     * @param oauthServer
+     * @throws Exception
+     */
+    @Override
+    public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
+        oauthServer
+                .tokenKeyAccess("permitAll()")
+                .checkTokenAccess("permitAll()")
+                .allowFormAuthenticationForClients();
+    }
+
+    // 相对于TokenEndpoint来说，之前配置的是AuthorizationServerSecurityConfigurer，
+    // 这个相当于pre认证，而AuthorizationServerEndpointsConfigurer这个相当于after认证
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-        super.configure(endpoints);
+        endpoints.authenticationManager(authenticationManager);
     }
 }

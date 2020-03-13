@@ -41,13 +41,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Resource
     private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
 
+    private static final String[] ignoreAuthUrl =
+            {"/authentication", "/refreshtoken", "/auth/**",
+                    "/favicon.ico","/callback","/error"};
+
     // http security 配置
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         // 禁用csrf ，否则会把所有请求当做非法请求拦截，后面再处理
         http.csrf()
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .ignoringAntMatchers("/authentication", "/refreshtoken", "/auth/**","/callback")
+                .ignoringAntMatchers(ignoreAuthUrl)
                 .and()
                 .cors().and()
                 .logout()
@@ -67,7 +71,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 // 需要放行的资源
-                .antMatchers("/authentication", "/refreshtoken", "/auth/**","/callback").permitAll()
+                .antMatchers(ignoreAuthUrl).permitAll()
                 // 权限表达式的使用和自定义
                 .anyRequest().access("@rbacService.hasPermission(request,authentication)");
 
