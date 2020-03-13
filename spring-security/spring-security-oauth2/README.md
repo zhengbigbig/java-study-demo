@@ -181,7 +181,7 @@ curl -X POST "http://localhost:8001/oauth/token"  --user client1:123456  -d "gra
 
 返回：
 ```shell script
-{"access_token":"2e25e838-f47b-44b3-847e-d96ed01a81af","token_type":"bearer","expires_in":43199,"scope":"all"}%
+{"access_token":"2e25e838-f47b-44b3-847e-d96ed01a81af","token_type":"bearer","expires_in":43199,"scope":"all"}
 ```
 
 ## 3. AccessToken令牌的刷新
@@ -462,6 +462,20 @@ public TokenStore tokenStore() {
 ```
 
 配置完成
+
+测试：
+
+- 通过之前的步骤授权access_token，获取之后你可以看到redis中就有了一条数据
+- 然后
+```shell script
+curl -X GET http://localhost:8002/api/hello -H "authorization:Bearer 23d0e145-2ad0-4d85-b796-778ea048c7c8"
+```
+
+正常返回：
+Hello Oauth2 Resource Server
+
+
+
 
 
 

@@ -2,6 +2,17 @@
 spring:
   profiles:
     active: dev
+  redis:
+    database: 0 # Redis 数据库索引（默认为 0）
+    host: 192.168.1.4 # Redis 服务器地址
+    port: 6379 # Redis 服务器连接端口
+    password: # Redis 服务器连接密码（默认为空）
+    lettuce:
+      pool:
+        max-active: 8 # 连接池最大连接数（使用负值表示没有限制） 默认 8
+        max-wait: -1 # 连接池最大阻塞等待时间（使用负值表示没有限制） 默认 -1
+        max-idle: 8 # 连接池中的最大空闲连接 默认 8
+        min-idle: 0 # 连接池中的最小空闲连接 默认 0
 
 # 实际生产中通常不直接写在配置文件里面,而是通过应用的启动参数传递，并且需要定期修改。
 jwt:
