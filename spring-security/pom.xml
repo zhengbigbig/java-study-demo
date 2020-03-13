@@ -29,6 +29,8 @@
         <module>jwt</module>
         <module>spring-social</module>
         <module>spring-security-oauth2</module>
+        <module>spring-security-oauth2-authorization</module>
+        <module>spring-security-oauth2-resource</module>
     </modules>
 
     <properties>
