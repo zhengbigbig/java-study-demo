@@ -10,6 +10,8 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
 
 import javax.annotation.Resource;
@@ -22,10 +24,23 @@ public class OAuth2ResourceServer extends ResourceServerConfigurerAdapter {
     private RedisConnectionFactory connectionFactory;
 
     @Bean
-    public TokenStore tokenStore() {
-        RedisTokenStore redis = new RedisTokenStore(connectionFactory);
-        return redis;
+    public JwtAccessTokenConverter accessTokenConverter() {
+        JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
+        converter.setSigningKey("用于签名解签名的secret密钥");
+        return converter;
     }
+
+    @Bean
+    public TokenStore tokenStore() {
+        return new JwtTokenStore(accessTokenConverter());
+    }
+
+
+//    @Bean
+//    public TokenStore tokenStore() {
+//        RedisTokenStore redis = new RedisTokenStore(connectionFactory);
+//        return redis;
+//    }
 
     @Override
     public void configure(ResourceServerSecurityConfigurer resources) {

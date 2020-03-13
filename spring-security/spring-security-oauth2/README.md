@@ -475,8 +475,160 @@ curl -X GET http://localhost:8002/api/hello -H "authorization:Bearer 23d0e145-2a
 Hello Oauth2 Resource Server
 
 
+## 5. 认证资源服务整合JWT
 
+### 5.1 JWT VS AccessToken
 
+相同点：
+- 认证的结果都是颁发了一个"资源访问令牌"，一个颁发的AccessToken，一个颁发的是JWT令牌。
+- 访问资源的时候都是通过HTTP请求头携带"资源访问令牌"
+- "资源访问令牌"需要被验证通过，才能访问系统资源
 
+不同点：
+- 在JWT的实现中，我们自己写了一个Controller进行用户的登录认证，并颁发令牌，刷新令牌。
+而Spring Security OAuth“认证服务器”的实现中我们只需要做配置。
+- JWT实现中只支持用户名密码登录认证授权这一种模式(当然我们也可以自己去编码实现授权码模式，但是工作量很大，实现效果还不一定好)
+而Spring Security OAuth“认证服务器”支持多种认证模式
 
+### 5.2 目的
 
+- 由Spring Security OAuth“认证服务器”颁发AccessToken(即：JWT令牌)。
+- 资源服务器的部分很简单，就是验证JWT令牌，提供资源接口
+
+### 5.3 实现认证服务器颁发JWT令牌
+
+- 引入依赖
+```xml
+<dependency>
+   <groupId>org.springframework.security</groupId>
+   <artifactId>spring-security-jwt</artifactId>
+   <version>1.0.11.RELEASE</version>
+</dependency>
+```
+
+使用如下配置初始化TokenStore 、JwtAccessTokenConverter 、TokenEnhancer 。
+实现```CustomJwtTokenConfig```
+
+```java
+@Configuration
+public class CustomJwtTokenConfig {
+
+    /**
+     * JwtTokenStore是一种特殊的TokenStore，它不将令牌信息存储到内存或者数据库。
+     * 而是让令牌携带状态信息，这是JWT令牌的特性
+     */
+    @Bean(name = "jwtTokenStore")
+    public TokenStore tokenStore() {
+        return new JwtTokenStore(jwtAccessTokenConverter());
+    }
+
+    //用于JWT令牌生成，需要设置用于签名解签名的secret密钥 uuid
+    @Bean
+    public JwtAccessTokenConverter jwtAccessTokenConverter() {
+        JwtAccessTokenConverter accessTokenConverter = new JwtAccessTokenConverter();
+        accessTokenConverter.setSigningKey("用于签名解签名的secret密钥");
+        return accessTokenConverter;
+    }
+
+    /**
+     * 增强访问令牌的策略
+     * 用来向JWT令牌中加入附加信息，也就是JWT令牌中的payload部分
+     */
+    @Bean
+    @ConditionalOnMissingBean(name = "jwtTokenEnhancer")
+    public TokenEnhancer jwtTokenEnhancer() {
+        return new MyJwtTokenEnhancer();
+    }
+
+    public static class MyJwtTokenEnhancer implements TokenEnhancer {
+
+        @Override
+        public OAuth2AccessToken enhance(OAuth2AccessToken accessToken,
+                                         OAuth2Authentication authentication) {
+            Map<String, Object> info = new HashMap<>();
+            info.put("xxx", "yyy");//扩展信息
+            ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(info);
+            return accessToken;
+        }
+
+    }
+
+}
+```
+
+在认证服务器OAuth2AuthorizationServer配置中，将上面三者进行整合
+
+- 测试认证服务器颁发JWT令牌
+
+```shell script
+curl -X POST --user client1:123456 http://localhost:8001/oauth/token -H "accept:application/json" -H "content-type:application/x-www-form-urlencoded" -d "grant_type=password&username=user&password=123456&scope=all"
+```
+
+返回JWT：
+```shell script
+{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ1c2VyIiwic2NvcGUiOlsiYWxsIl0sInh4eCI6Inl5eSIsImV4cCI6MTU4NDcxMjQyMiwiYXV0aG9yaXRpZXMiOlsic3lzOmxvZyIsImluZGV4IiwiUk9MRV9BRE1JTiIsInN5czp1c2VyIl0sImp0aSI6ImRlMmVjNmFjLTIzNDQtNGM4Mi1hMzlkLWMwZmVjNDBlMDc0MCIsImNsaWVudF9pZCI6ImNsaWVudDEifQ.8D4FVi-EbXQTB0HJlGFiPtk6COXlhlp7iIZ_uggtY60","token_type":"bearer","refresh_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ1c2VyIiwic2NvcGUiOlsiYWxsIl0sImF0aSI6ImRlMmVjNmFjLTIzNDQtNGM4Mi1hMzlkLWMwZmVjNDBlMDc0MCIsInh4eCI6Inl5eSIsImV4cCI6MTU4NjY5OTYyMiwiYXV0aG9yaXRpZXMiOlsic3lzOmxvZyIsImluZGV4IiwiUk9MRV9BRE1JTiIsInN5czp1c2VyIl0sImp0aSI6IjBjZDY3YmQ5LWQ0OGEtNDhjNi04YTUzLWY4M2Q5N2I3YzRjYiIsImNsaWVudF9pZCI6ImNsaWVudDEifQ.5IZyypNUcjveyh6j99-vyGNJFDwGXeJq6K1k5StrsYs","expires_in":604799,"scope":"all","xxx":"yyy","jti":"de2ec6ac-2344-4c82-a39d-c0fec40e0740"}
+```
+
+### 5.4 资源服务器使用JWT令牌
+
+同样先通过maven引入spring-security-jwt。然后在OAuth2ResourceServer配置中将tokenStore和tokenServices配置更换为JWT相关配置。
+
+```java
+    @Bean
+    public JwtAccessTokenConverter accessTokenConverter() {
+        JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
+        converter.setSigningKey("用于签名解签名的secret密钥");
+        return converter;
+    }
+    
+    @Bean
+    public TokenStore tokenStore() {
+        return new JwtTokenStore(accessTokenConverter());
+    }
+    
+    @Bean
+    @Primary
+    public DefaultTokenServices tokenServices() {
+        DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
+        defaultTokenServices.setTokenStore(tokenStore());
+        return defaultTokenServices;
+    }
+    
+    @Override
+    public void configure(ResourceServerSecurityConfigurer resources)  {
+        resources.tokenServices(tokenServices());
+    }
+```
+
+测试：
+```shell script
+curl -X GET http://localhost:8002/api/hello -H "authorization: Bearer  <替换为上文中申请的access_token>"
+# 响应结果： Hello Oauth2 Resource Server
+```
+
+```java
+@RestController
+@RequestMapping("/api")
+public class HelloController {
+
+    @RequestMapping("/hello")
+    public String hello(OAuth2Authentication authentication) {
+        Map<String, Object> map = getExtraInfo(authentication);
+        return "Hello Oauth2 Resource Server";
+    }
+
+    @Resource
+    TokenStore tokenStore;
+
+    public Map<String, Object> getExtraInfo(OAuth2Authentication auth) {
+        OAuth2AuthenticationDetails details
+                = (OAuth2AuthenticationDetails) auth.getDetails();
+        OAuth2AccessToken accessToken = tokenStore
+                .readAccessToken(details.getTokenValue());
+        return accessToken.getAdditionalInformation();
+    }
+
+}
+```
+
+对接口进行断点调试，可看到解码的内容

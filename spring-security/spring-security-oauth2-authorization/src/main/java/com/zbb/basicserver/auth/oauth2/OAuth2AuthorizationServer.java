@@ -11,12 +11,17 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.token.TokenEnhancer;
+import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by zhengzhiheng on 2020/3/11 10:06 下午
@@ -38,6 +43,15 @@ public class OAuth2AuthorizationServer extends AuthorizationServerConfigurerAdap
 
     @Resource
     private RedisConnectionFactory connectionFactory;
+
+    @Resource
+    private JwtAccessTokenConverter jwtAccessTokenConverter;
+
+    @Resource
+    private TokenEnhancer jwtTokenEnhancer;
+
+    @Resource
+    private TokenStore jwtTokenStore;
 
     @Bean
     public TokenStore tokenStore() {
@@ -80,6 +94,19 @@ public class OAuth2AuthorizationServer extends AuthorizationServerConfigurerAdap
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints.authenticationManager(authenticationManager)
                 .userDetailsService(userDetailsService)
-                .tokenStore(tokenStore());
+//                .tokenStore(tokenStore());
+                .tokenStore(jwtTokenStore);
+
+        //整合JWT
+        if (jwtAccessTokenConverter != null && jwtTokenEnhancer != null) {
+            TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
+            List<TokenEnhancer> enhancerList = new ArrayList<>();
+            enhancerList.add(jwtTokenEnhancer);
+            enhancerList.add(jwtAccessTokenConverter);
+            tokenEnhancerChain.setTokenEnhancers(enhancerList);
+            //jwt
+            endpoints.tokenEnhancer(tokenEnhancerChain)
+                    .accessTokenConverter(jwtAccessTokenConverter);
+        }
     }
 }
