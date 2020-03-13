@@ -27,14 +27,19 @@ public class OAuth2AuthorizationServer extends AuthorizationServerConfigurerAdap
     @Resource
     private AuthenticationManager authenticationManager;
 
+    @Resource
+    private CustomUserDetailsService userDetailsService;
+
     // 客户端配置信息
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         clients.inMemory()
                 .withClient("client1").secret(passwordEncoder.encode("123456")) // Client 账号、密码。
                 .redirectUris("http://localhost:8888/callback") // 配置回调地址，选填。
-                .authorizedGrantTypes("authorization_code", "password", "implicit","client_credentials") // 授权码模式
-                .scopes("all"); // 可授权的 Scope
+                .authorizedGrantTypes("authorization_code", "refresh_token", "password", "implicit", "client_credentials") // 授权码模式
+                .scopes("all") // 可授权的 Scope
+                .accessTokenValiditySeconds(7 * 24 * 60 * 60)
+                .refreshTokenValiditySeconds(30 * 24 * 60 * 60);
     }
 
     /**
@@ -58,6 +63,7 @@ public class OAuth2AuthorizationServer extends AuthorizationServerConfigurerAdap
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-        endpoints.authenticationManager(authenticationManager);
+        endpoints.authenticationManager(authenticationManager)
+                .userDetailsService(userDetailsService);
     }
 }

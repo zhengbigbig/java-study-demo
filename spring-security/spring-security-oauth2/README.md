@@ -89,7 +89,7 @@ http://localhost:8001/oauth/authorize?client_id=client1&redirect_uri=http://loca
 两种方式测试：
 1. CURL
 ```shell script
-curl -X POST --user client1:123456 http://localhost:8001/oauth/token  -H "content-type: application/x-www-form-urlencoded" -d "code=2gMHpI&grant_type=authorization_code&redirect_uri=http://localhost:8888/callback&scope=all"
+curl -X POST --user client1:123456 http://localhost:8001/oauth/token  -H "content-type: application/x-www-form-urlencoded" -d "code=23462r&grant_type=authorization_code&redirect_uri=http://localhost:8888/callback&scope=all"
 ```
 2. 通过PostMan发送请求
 - content-type: application/x-www-form-urlencoded
@@ -183,3 +183,57 @@ curl -X POST "http://localhost:8001/oauth/token"  --user client1:123456  -d "gra
 ```shell script
 {"access_token":"2e25e838-f47b-44b3-847e-d96ed01a81af","token_type":"bearer","expires_in":43199,"scope":"all"}%
 ```
+
+## 3. AccessToken令牌的刷新
+
+- AccessToken是有有效期的
+- 防止令牌过期，造成用户频繁登录，体验不佳，因此Spring Security OAuth也提供了刷新AccessToken的方法
+
+### 3.1 配置令牌刷新
+
+- 配置方式为authorizedGrantTypes加上```refresh_token```配置
+- 为OAuth2AuthorizationServer配置类加入UserDetailsService,刷新令牌的时候需要用户信息
+
+```java
+@Override
+public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+    endpoints.authenticationManager(authenticationManager)
+             .userDetailsService(myUserDetailsService);
+}
+```
+### 3.2 配置令牌有效时间
+
+```java
+    @Override
+    public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+        clients.inMemory()
+                .withClient("client1").secret(passwordEncoder.encode("123456")) // Client 账号、密码。
+                .redirectUris("http://localhost:8888/callback") // 配置回调地址，选填。
+                .authorizedGrantTypes("authorization_code", "password", "implicit", "client_credentials", "refresh_token") // 授权码模式
+                .scopes("all") // 可授权的 Scope
+                .accessTokenValiditySeconds(7 * 24 * 60 * 60)
+                .refreshTokenValiditySeconds(30 * 24 * 60 * 60);
+    }
+```
+
+### 3.3 测试
+
+使用上面授权码模式和客户端模式获取将会多出一条refresh_token，如下
+```shell script
+{
+    "access_token": "63de6c71-672f-418c-80eb-0c9abc95b67c",
+    "token_type": "bearer",
+    "refresh_token": "8495d597-0560-4598-95ef-143c0855363c",
+    "expires_in": 43199,
+    "scope": "select"
+}
+
+```
+
+使用refresh_token刷新access_token
+```shell script
+http://localhost:8001/oauth/token?grant_type=refresh_token&refresh_token=8495d597-0560-4598-95ef-143c0855363c&client_id=client1&client_secret=123456
+
+```
+
+
