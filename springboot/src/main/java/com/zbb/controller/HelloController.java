@@ -14,7 +14,7 @@ public class HelloController {
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String index() {
-        Article article = new Article(1L, "xxx");
+        Article article = new Article();
         article.setAuthor("yyy");
         Article.builder().id(2L).author("zzz").build();
         return "Hello World";
