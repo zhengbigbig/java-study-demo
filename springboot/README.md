@@ -48,3 +48,6 @@
 ### 1.4 GsonFormat插件
 - 根据JSON的结构来生成Java类(快捷键alt + s)
 - 此外：谷歌插件可以安装JSONView
+
+### 1.5 Maven Helper
+- 分析依赖，解决冲突
