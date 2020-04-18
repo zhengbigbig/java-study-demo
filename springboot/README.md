@@ -170,4 +170,22 @@ public class TeamToXlsConverter extends AbstractHttpMessageConverter<Team> {
     }
 }
 ```
-    
+
+# 3. JSON数据处理
+
+## 3.1 Jackson 常用注解
+- @JsonIgnore 排除属性不做序列化操作
+- @JsonProperty
+- @JsonPropertyOrder(value={"pname","pname2"})改变json子元素的顺序
+- @JsonInclude(JsonInclude.Include.NON_NULL) 排除为空的元素不做序列化反序列化
+- @JsonFormat(pattern = "yyyy-MM-dd HHmmss", timezone = "GMT+8") 指定属性格式
+
+日期类型转化全局配置
+```xml
+spring:
+    jackson:
+        data-format: yyyy-MM-dd HH:mm:ss
+        time-zone: GMT+8
+```
+
+## 3.2 
