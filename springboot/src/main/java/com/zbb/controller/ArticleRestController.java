@@ -24,8 +24,7 @@ public class ArticleRestController {
         log.info("saveArticle：{}",article);
         return  AjaxResponse.success(article);
     }
- 
-    
+
     //删除一篇Article，使用DELETE方法，参数是id
     @RequestMapping(value = "/article/{id}", method = DELETE, produces = "application/json")
     public AjaxResponse deleteArticle(@PathVariable Long id) {

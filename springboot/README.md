@@ -188,4 +188,32 @@ spring:
         time-zone: GMT+8
 ```
 
-## 3.2 
+# 4. Mockito编码完成接口测试
+
+4.1 注解说明（以junit5）
+- @Test 声明一个测试方法
+- @BeforeAll 在当前类的所有测试方法之前执行。注解在【静态方法】上
+- @AfterAll 在当前类中的所有测试方法之后执行。注解在【静态方法】上
+- @BeforeEach 在每个测试方法之前执行。注解在【非静态方法】上
+- @AfterEach 在每个测试方法之后执行。注解在【非静态方法】
+
+- @SpringBootTest 
+是用来创建Spring的上下文ApplicationContext，保证测试在上下文环境里运行。
+单独使用@SpringBootTest不会启动servlet容器。
+所以只是使用SpringBootTest 注解，不可以使用@Resource和@Autowired等注解进行bean的依赖注入。（准确的说是可以使用，但被注解的bean为null）。
+- @Transactional
+可以使单元测试进行事务回滚，以保证数据库表中没有因测试造成的垃圾数据，因此保证单元测试可以反复执行；
+不建议这么做，使用该注解会破坏测试真实性。
+
+4.2 MockMvc对象的几个基本方法
+- perform : 执行一个RequestBuilder请求，会自动执行SpringMVC的流程并映射到相应的控制器Controller执行处理。
+- contentType：发送请求内容的序列化的格式，"application/json"表示JSON数据格式
+- andExpect: 添加RequsetMatcher验证规则，验证控制器执行完成后结果是否正确，或者说是结果是否与我们期望（Expect）的一致。
+- andDo: 添加ResultHandler结果处理器，比如调试时打印结果到控制台
+- andReturn: 最后返回相应的MvcResult,然后进行自定义验证/进行下一步的异步处理
+
+4.3 @RunWith注解
+- RunWith方法为我们构造了一个的Servlet容器运行运行环境，并在此环境下测试。
+- 而@AutoConfigureMockMvc注解，该注解表示 MockMvc由spring容器构建，你只负责注入之后用就可以了。这种写法是为了让测试在Spring容器环境下执行。
+- 简单的说：如果你单元测试代码使用了依赖注入就加上@RunWith，如果你不是手动new MockMvc对象就加上@AutoConfigureMockMvc
+
