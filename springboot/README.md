@@ -190,7 +190,7 @@ spring:
 
 # 4. Mockito编码完成接口测试
 
-4.1 注解说明（以junit5）
+## 4.1 注解说明（以junit5）
 - @Test 声明一个测试方法
 - @BeforeAll 在当前类的所有测试方法之前执行。注解在【静态方法】上
 - @AfterAll 在当前类中的所有测试方法之后执行。注解在【静态方法】上
@@ -205,15 +205,140 @@ spring:
 可以使单元测试进行事务回滚，以保证数据库表中没有因测试造成的垃圾数据，因此保证单元测试可以反复执行；
 不建议这么做，使用该注解会破坏测试真实性。
 
-4.2 MockMvc对象的几个基本方法
+## 4.2 MockMvc对象的几个基本方法
 - perform : 执行一个RequestBuilder请求，会自动执行SpringMVC的流程并映射到相应的控制器Controller执行处理。
 - contentType：发送请求内容的序列化的格式，"application/json"表示JSON数据格式
 - andExpect: 添加RequsetMatcher验证规则，验证控制器执行完成后结果是否正确，或者说是结果是否与我们期望（Expect）的一致。
 - andDo: 添加ResultHandler结果处理器，比如调试时打印结果到控制台
 - andReturn: 最后返回相应的MvcResult,然后进行自定义验证/进行下一步的异步处理
 
-4.3 @RunWith注解
+## 4.3 @RunWith注解
 - RunWith方法为我们构造了一个的Servlet容器运行运行环境，并在此环境下测试。
 - 而@AutoConfigureMockMvc注解，该注解表示 MockMvc由spring容器构建，你只负责注入之后用就可以了。这种写法是为了让测试在Spring容器环境下执行。
 - 简单的说：如果你单元测试代码使用了依赖注入就加上@RunWith，如果你不是手动new MockMvc对象就加上@AutoConfigureMockMvc
 
+## 4.4 @SpringBootTest与@WebMvcTest区别
+- @SpringBootTest注解告诉SpringBoot去寻找一个主配置类(例如带有@SpringBootApplication的配置类)，并使用它来启动Spring应用程序上下文。
+SpringBootTest加载完整的应用程序并注入所有可能的bean，因此速度会很慢。
+- @WebMvcTest注解主要用于controller层测试，只覆盖应用程序的controller层，HTTP请求和响应是Mock出来的，因此不会创建真正的网络连接。
+WebMvcTest要快得多，因为我们只加载了应用程序的一小部分。
+
+# 5. 使用swagger2构建发布API文档
+## 5.1 引入依赖
+```xml
+<!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger2 -->
+<dependency>
+    <groupId>io.springfox</groupId>
+    <artifactId>springfox-swagger2</artifactId>
+    <version>2.9.2</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger-ui -->
+<dependency>
+    <groupId>io.springfox</groupId>
+    <artifactId>springfox-swagger-ui</artifactId>
+    <version>2.9.2</version>
+</dependency>
+
+```
+## 5.2 定义配置
+```java
+package com.zbb.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import springfox.documentation.builders.ApiInfoBuilder;
+import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.service.ApiInfo;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+@Configuration
+@EnableSwagger2
+public class Swagger2 {
+
+    private ApiInfo apiInfo() {
+		return new ApiInfoBuilder()
+				.title("springboot利用swagger构建api文档")
+				.description("简单优雅的restfun风格")
+				.termsOfServiceUrl("http://zhengbigbig.top")
+				.version("1.0")
+				.build();
+    }
+
+	@Bean
+	public Docket createRestApi() {
+		return new Docket(DocumentationType.SWAGGER_2)
+                        .apiInfo(apiInfo())
+                        .select()
+                        //扫描basePackage包下面的“/rest/”路径下的内容作为接口文档构建的目标
+                        .apis(RequestHandlerSelectors.basePackage("com.zbb"))
+                        .paths(PathSelectors.regex("/rest/.*"))
+                        .build();
+	}
+	
+	
+}
+```
+- @EnableSwagger2 注解表示开启SwaggerAPI文档相关的功能
+- 在apiInfo方法中配置接口文档的title(标题)、描述、termsOfServiceUrl（服务协议）、版本等相关信息
+- 在createRestApi方法中，basePackage表示扫描哪个package下面的Controller类作为API接口文档内容范围
+- 在createRestApi方法中，paths表示哪一个请求路径下控制器映射方法，作为API接口文档内容范围
+
+## 5.3 启动
+- 启动项目，然后访问swagger-ui.html
+
+## 5.3 书写接口文档
+```java
+@ApiOperation(value = "添加文章", notes = "添加新的文章", tags = "Article",httpMethod = "POST")
+@ApiImplicitParams({
+        @ApiImplicitParam(name = "title", value = "文章标题", required = true, dataType = "String"),
+        @ApiImplicitParam(name = "content", value = "文章内容", required = true, dataType = "String"),
+        @ApiImplicitParam(name = "author", value = "文章作者", required = true, dataType = "String")
+})
+@ApiResponses({
+        @ApiResponse(code=200,message="成功",response=AjaxResponse.class),
+})
+@PostMapping("/article")
+public @ResponseBody  AjaxResponse saveArticle(
+        @RequestParam(value="title") String title,  //参数1
+        @RequestParam(value="content") String content,//参数2
+        @RequestParam(value="author") String author,//参数3
+) {
+
+```
+## 5.4 常用注解
+- @Api：用在Controller控制器类上
+     属性tags="说明该类的功能及作用"
+
+- @ApiOperation：用在Controller控制器类的请求的方法上
+    value="说明方法的用途、作用"
+    notes="方法的备注说明"
+
+- @ApiImplicitParams：用在请求的方法上，表示一组参数说明
+    @ApiImplicitParam：请求方法中参数的说明
+        name：参数名
+        value：参数的汉字说明、解释、用途
+        required：参数是否必须传，布尔类型
+        paramType：参数的类型，即参数存储位置或提交方式
+            · header --> Http的Header携带的参数的获取：@RequestHeader
+            · query --> 请求参数的获取：@RequestParam   （如上面的例子）
+            · path（用于restful接口）--> 请求参数的获取：@PathVariable
+            · body（不常用）
+            · form（不常用）    
+        dataType：参数类型，默认String，其它值dataType="Integer"       
+        defaultValue：参数的默认值
+
+- @ApiResponses：用在控制器的请求的方法上，对方法的响应结果进行描述
+    @ApiResponse：用于表达一个响应信息
+        code：数字，例如400
+        message：信息，例如"请求参数没填好"
+        response：响应结果封装类，如上例子中的AjaxResponse.class
+
+- @ApiModel：value=“通常用在描述@RequestBody和@ResponseBody注解修饰的接收参数或响应参数实体类”
+    @ApiModelProperty：value="实体类属性的描述"
+    
+## 5.5 生产环境下如何禁用swagger2
+- 禁用方法1：使用注解@Profile({"dev","test"}) 表示在开发或测试环境开启，而在生产关闭。
+- 禁用方法2：使用注解@ConditionalOnProperty(name = "swagger.enable", havingValue = "true") 然后在测试配置或者开发配置中 添加 swagger.enable = true 即可开启，生产环境不填则默认关闭Swagger.

@@ -1,5 +1,8 @@
 package com.zbb.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zbb.model.Article;
+import com.zbb.service.ArticleRestService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
@@ -7,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -18,6 +22,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import javax.annotation.Resource;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 //@Transactional 可以使单元测试进行事务回滚，以保证数据库表中没有因测试造成的垃圾数据，因此保证单元测试可以反复执行；
@@ -30,7 +35,8 @@ public class ArticleRestControllerTest {
     //mock对象
     @Resource
     private MockMvc mockMvc;
-
+    @MockBean
+    private ArticleRestService service;
     //mock对象初始化
 //    @BeforeEach
 //    public void setUp() {
@@ -42,6 +48,10 @@ public class ArticleRestControllerTest {
     public void saveArticle() throws Exception {
 
         String article = "{\"id\":1,\"author\":\"xxx\",\"title\":\"xxx\",\"content\":\"xxx\",\"createTime\":\"2017-07-16 05:23:34\"}";
+        ObjectMapper objectMapper = new ObjectMapper();
+        Article articleObj = objectMapper.readValue(article, Article.class);
+        //打桩
+        when(service.save(articleObj)).thenReturn("ok");
         MvcResult result = mockMvc.perform(
                 MockMvcRequestBuilders.request(HttpMethod.POST, "/rest/article")
                         .contentType("application/json").content(article))
