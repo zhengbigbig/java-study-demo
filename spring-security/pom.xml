@@ -49,7 +49,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>2.2.5.RELEASE</version>
+            <version>2.5.12</version>
         </dependency>
         <!-- provided 假定目标的容器，已经提供了这个jar包，所以无需我们这个artifact对应的jar包了 -->
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
